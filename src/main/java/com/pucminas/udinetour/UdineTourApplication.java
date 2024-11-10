@@ -1,15 +1,12 @@
 package com.pucminas.udinetour;
 
-import com.pucminas.udinetour.functions.ConcatFunction;
+import com.pucminas.udinetour.integration.google.vertex.VertexAIService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 @SpringBootApplication
 public class UdineTourApplication {
@@ -18,22 +15,18 @@ public class UdineTourApplication {
         SpringApplication.run(UdineTourApplication.class, args);
     }
 
+    @Autowired
+    private VertexAIService vertexService;
+
     @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext context){
+    public CommandLineRunner run(ApplicationContext context) {
         return args -> {
-            FunctionCatalog catalog  = context.getBean(FunctionCatalog.class);
-//            Function<String, String> reverse = catalog.lookup(Function.class, "reverseString");
-//            System.out.println("Reverse: " +reverse.apply("Hello World"));
+            String prompt = "Olá! Quero uma descrição resumida da praça Raul Soares em Belo Horizonte MG?";
+            String response = vertexService.processPrompt(prompt);
+            System.out.println(response);
 
-            Function<String, String> concat = catalog.lookup( "concatFunction");
-            Function<String, String> conc =  catalog.lookup(ConcatFunction.class, null);
-
-            System.out.println("Concat: " +concat.apply("Hello World"));
         };
     }
 
-//    @Bean
-//    public Function<String, String> reverseString() {
-//        return value -> new StringBuilder(value).reverse().toString();
-//    }
+
 }
