@@ -4,3 +4,13 @@ server:
 spring:
   application:
     name: UdineTour
+
+
+udine:
+  vertex:
+    gemini:
+      url: ${VERTEX_GEMINI_URL}
+      apiKey: ${VERTEX_GEMINI_API_KEY}
+      name:
+        param:
+          apiKey: ${VERTEX_GEMINI_NAME_PARAM_API_KEY:key}

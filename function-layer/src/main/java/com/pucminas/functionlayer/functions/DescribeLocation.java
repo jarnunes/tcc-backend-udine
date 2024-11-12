@@ -1,7 +1,7 @@
 package com.pucminas.functionlayer.functions;
 
 
-import com.pucminas.functionlayer.integrations.google.vertex.VertexAIService;
+import com.pucminas.integrations.google.vertex.VertexAIService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
