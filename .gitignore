@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### Udine ###
+*/layer_content.zip
+*/java/lib/*.jar
