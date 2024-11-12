@@ -20,8 +20,8 @@
     <properties>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <spg-config.version>0.0.1-SNAPSHOT</spg-config.version>
 
         <spring-boot.version>3.3.5</spring-boot.version>
@@ -66,6 +66,16 @@
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-aiplatform</artifactId>
             <version>3.54.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-speech</artifactId>
+            <version>4.48.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-texttospeech</artifactId>
+            <version>2.54.0</version>
         </dependency>
 
         <dependency>

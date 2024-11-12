@@ -3,6 +3,10 @@ REM Cria as pastas "java" e "java/lib"
 mkdir java
 mkdir java\lib
 
+rem remove os arquivos .jar
+del java\lib\integration.jar
+del layer_content.zip
+
 REM Copia o arquivo JAR para a pasta "java/lib"
 copy target\integration.jar java\lib\
 

@@ -5,7 +5,6 @@ spring:
   application:
     name: UdineTour
 
-
 udine:
   vertex:
     gemini:
@@ -14,3 +13,7 @@ udine:
       name:
         param:
           apiKey: ${VERTEX_GEMINI_NAME_PARAM_API_KEY:key}
+  google:
+    places:
+      url: ${GOOGLE_PLACES_URL:https://maps.googleapis.com/maps/api/place/nearbysearch/json}
+      apiKey: ${GOOGLE_PLACES_API_KEY}
