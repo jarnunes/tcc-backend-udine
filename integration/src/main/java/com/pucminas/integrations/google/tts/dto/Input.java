@@ -1,4 +1,4 @@
-package com.pucminas.integrations.google.text_to_speech.dto;
+package com.pucminas.integrations.google.tts.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TextToSpeechResponse {
-    private String audioContent;
+public class Input {
+
+    private String text;
 }

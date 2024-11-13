@@ -1,4 +1,4 @@
-package com.pucminas.integrations.google.text_to_speech.dto;
+package com.pucminas.integrations.google.tts.dto;
 
 
 import lombok.AllArgsConstructor;

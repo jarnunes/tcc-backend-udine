@@ -1,4 +1,4 @@
-package com.pucminas.integrations.google.text_to_speech;
+package com.pucminas.integrations.google.tts;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

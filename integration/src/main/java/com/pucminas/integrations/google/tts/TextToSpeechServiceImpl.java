@@ -1,8 +1,8 @@
-package com.pucminas.integrations.google.text_to_speech;
+package com.pucminas.integrations.google.tts;
 
 
-import com.pucminas.integrations.google.text_to_speech.dto.TextToSpeechRequest;
-import com.pucminas.integrations.google.text_to_speech.dto.TextToSpeechResponse;
+import com.pucminas.integrations.google.tts.dto.TextToSpeechRequest;
+import com.pucminas.integrations.google.tts.dto.TextToSpeechResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
