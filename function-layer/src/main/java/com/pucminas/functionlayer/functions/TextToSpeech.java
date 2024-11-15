@@ -1,7 +1,7 @@
 package com.pucminas.functionlayer.functions;
 
-import com.pucminas.integrations.google.tts.TextToSpeechService;
-import com.pucminas.integrations.google.tts.dto.TextToSpeechResponse;
+import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
+import com.pucminas.integrations.google.tech_to_speech.dto.TextToSpeechResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

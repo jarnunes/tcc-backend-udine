@@ -1,8 +1,8 @@
-package com.pucminas.integrations.google.tts;
+package com.pucminas.integrations.google.tech_to_speech;
 
 
-import com.pucminas.integrations.google.tts.dto.TextToSpeechRequest;
-import com.pucminas.integrations.google.tts.dto.TextToSpeechResponse;
+import com.pucminas.integrations.google.tech_to_speech.dto.TextToSpeechRequest;
+import com.pucminas.integrations.google.tech_to_speech.dto.TextToSpeechResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -11,10 +11,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class TextToSpeechServiceImpl implements TextToSpeechService {
-    private STTProperties properties;
+    private TTSProperties properties;
 
     @Autowired
-    public void setProperties(STTProperties properties) {
+    public void setProperties(TTSProperties properties) {
         this.properties = properties;
     }
 

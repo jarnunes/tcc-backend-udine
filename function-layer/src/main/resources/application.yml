@@ -18,7 +18,12 @@ udine:
       url: ${GOOGLE_PLACES_URL:https://maps.googleapis.com/maps/api/place/nearbysearch/json}
       apiKey: ${GOOGLE_PLACES_API_KEY}
 
+  text-to-speech:
+    base-uri: ${TEXT_TO_SPEECH_BASE_URI:https://texttospeech.googleapis.com}
+    path: ${TEXT_TO_SPEECH_PATH:/v1beta1/text:synthesize}
+    apiKey: ${TEXT_TO_SPEECH_API_KEY}
+
   speech-to-text:
-    base-uri: ${SPEECH_TO_TEXT_BASE_URI:https://texttospeech.googleapis.com}
-    path: ${SPEECH_TO_TEXT_PATH:/v1beta1/text:synthesize}
+    base-uri: ${SPEECH_TO_TEXT_BASE_URI:https://speech.googleapis.com}
+    path: ${SPEECH_TO_TEXT_PATH:/v1/speech:recognize}
     apiKey: ${SPEECH_TO_TEXT_API_KEY}
