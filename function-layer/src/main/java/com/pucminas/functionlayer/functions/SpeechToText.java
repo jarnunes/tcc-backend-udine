@@ -18,10 +18,11 @@ public class SpeechToText implements Function<String, String> {
 
     @Override
     public String apply(String audio) {
-        try {
-            return service.speechToText(audio);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return service.recognize(audio);
+//        try {
+//            return service.speechToText(audio);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

@@ -1,6 +1,5 @@
 package com.pucminas.integrations.google.speech_to_text.dto;
 
-import com.google.cloud.speech.v1p1beta1.RecognitionConfig;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,15 +8,17 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class Config {
-    private RecognitionConfig.AudioEncoding encoding;
+    private AudioEncodingType encoding;
     private Integer sampleRateHertz;
     private String languageCode;
     private Boolean enableWordTimeOffsets;
+    private Boolean enableAutomaticPunctuation;
 
     public Config() {
-        this.encoding = RecognitionConfig.AudioEncoding.OGG_OPUS;
+        this.encoding = AudioEncodingType.OGG_OPUS;
         this.sampleRateHertz = 16000;
         this.languageCode = "pt-BR";
         this.enableWordTimeOffsets = false;
+        this.enableAutomaticPunctuation = true;
     }
 }

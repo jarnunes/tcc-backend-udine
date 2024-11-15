@@ -1,14 +1,15 @@
 package com.pucminas.integrations.google.speech_to_text;
 
-import com.google.api.gax.core.FixedCredentialsProvider;
-import com.google.auth.ApiKeyCredentials;
-import com.google.cloud.speech.v1p1beta1.*;
-import com.google.protobuf.ByteString;
+import com.pucminas.integrations.google.speech_to_text.dto.Result;
+import com.pucminas.integrations.google.speech_to_text.dto.SpeechToTextRequest;
+import com.pucminas.integrations.google.speech_to_text.dto.SpeechToTextResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
-import java.util.Base64;
+import java.util.List;
 // https://cloudconvert.com/ogg-to-wav
 
 @Service
@@ -21,36 +22,30 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
         this.properties = properties;
     }
 
-    @Override
-    public String speechToText(String audio) throws IOException {
-        final ApiKeyCredentials credentials = ApiKeyCredentials.create(properties.getApiKey());
-        final SpeechSettings speechSettings = SpeechSettings.newBuilder()
-                .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
-                .build();
 
-        final byte[] bytes = Base64.getDecoder().decode(audio);
+    public String recognize(String audio) {
+        final SpeechToTextRequest request = new SpeechToTextRequest(audio);
 
-        try (SpeechClient speechClient = SpeechClient.create(speechSettings)) {
-            final ByteString audioBytes = ByteString.copyFrom(bytes);
-            final RecognitionConfig recognitionConfig = RecognitionConfig.newBuilder()
-                    .setEncoding(RecognitionConfig.AudioEncoding.OGG_OPUS)
-                    .setSampleRateHertz(16000)
-                    .setLanguageCode("pt-BR")
-                    .setEnableWordTimeOffsets(false)
-                    .build();
+        return WebClient.builder().baseUrl(properties.getBaseURI()).build()
+                .post().uri(uriBuilder -> uriBuilder
+                        .path(properties.getPath())
+                        .queryParam("key", properties.getApiKey())
+                        .build())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(request))
+                .retrieve()
+                .bodyToMono(SpeechToTextResponse.class)
+                .map(SpeechToTextResponse::getResults)
+                .map(this::getTranscript)
+                .block();
+    }
 
-            RecognitionAudio recognitionAudio = RecognitionAudio.newBuilder()
-                    .setContent(audioBytes)
-                    .build();
-
-            RecognizeResponse response = speechClient.recognize(recognitionConfig, recognitionAudio);
-
-            final StringBuilder transcription = new StringBuilder();
-            for (SpeechRecognitionResult result : response.getResultsList()) {
-                transcription.append(result.getAlternativesList().get(0).getTranscript());
-            }
-            return transcription.toString();
+    private String getTranscript(List<Result> results) {
+        if (results != null && !results.isEmpty()) {
+            Result result = results.get(0);
+            return result.getAlternatives().get(0).getTranscript();
         }
+        return "";
     }
 
 }
