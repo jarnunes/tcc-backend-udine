@@ -14,4 +14,6 @@ public class PlacesRequest {
     Double latitude;
     Double longitude;
     Integer radius;
+    String type = "tourist_attraction";
+
 }

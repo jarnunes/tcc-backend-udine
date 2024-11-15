@@ -17,6 +17,9 @@ udine:
     places:
       url: ${GOOGLE_PLACES_URL:https://maps.googleapis.com/maps/api/place/nearbysearch/json}
       apiKey: ${GOOGLE_PLACES_API_KEY}
+      types:
+        - tourist_attraction
+        - park
 
   text-to-speech:
     base-uri: ${TEXT_TO_SPEECH_BASE_URI:https://texttospeech.googleapis.com}
