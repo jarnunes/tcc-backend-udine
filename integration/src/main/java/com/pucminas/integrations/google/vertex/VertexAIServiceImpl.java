@@ -1,5 +1,6 @@
 package com.pucminas.integrations.google.vertex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pucminas.Message;
 import com.pucminas.integrations.google.vertex.dto.GeminiCandidate;
 import com.pucminas.integrations.google.vertex.dto.GeminiPart;
@@ -33,8 +34,24 @@ public class VertexAIServiceImpl implements VertexAIService {
 
     @Override
     public GeminiResponse processPrompt(final String prompt) {
+        log.info("Prompt: " + prompt);
+
         final GeminiRequest geminiRequest = GeminiRequest.GeminiRequestBuilder.prompt(prompt).build();
-        return WebClient.builder().baseUrl(vertexProperties.getGeminiUrl()).build()
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Converte o objeto para uma string JSON
+        try {
+            String jsonString = objectMapper.writeValueAsString(geminiRequest);
+            log.info("JSON: " + jsonString);
+        }catch (Exception e) {
+            log.error("Error: " + e.getMessage());
+        }
+
+        WebClient cliente =  WebClient.builder().baseUrl(vertexProperties.getGeminiUrl()).build();
+        log.info("URL: " + vertexProperties.getGeminiUrl());
+
+        return cliente
                 .post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(geminiRequest))
