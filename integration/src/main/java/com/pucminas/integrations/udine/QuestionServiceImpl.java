@@ -4,7 +4,6 @@ import com.pucminas.integrations.google.places.PlacesService;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
 import com.pucminas.integrations.google.speech_to_text.SpeechToTextService;
 import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
-import com.pucminas.integrations.google.tech_to_speech.dto.TextToSpeechResponse;
 import com.pucminas.integrations.google.vertex.VertexAIService;
 import com.pucminas.integrations.udine.vo.QuestionFormatType;
 import com.pucminas.integrations.udine.vo.QuestionRequest;

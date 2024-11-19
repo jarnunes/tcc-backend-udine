@@ -47,7 +47,7 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
     public String recognizeAudioMP3(String audio) {
         final SpeechToTextRequest request = new SpeechToTextRequest(audio);
         request.getConfig().setEncoding(AudioEncodingType.MP3);
-        return recognizeAudio(new SpeechToTextRequest(audio));
+        return recognizeAudio(request);
     }
 
     private String getTranscript(List<Result> results) {
