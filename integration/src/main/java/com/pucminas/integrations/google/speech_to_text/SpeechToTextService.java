@@ -1,7 +1,12 @@
 package com.pucminas.integrations.google.speech_to_text;
 
-// https://docs.spring.io/spring-ai/reference/api/audio/speech/openai-speech.html
+import com.pucminas.integrations.google.speech_to_text.dto.SpeechToTextRequest;
+
 public interface SpeechToTextService {
 
-    String recognize(String audio);
+    String recognizeAudio(SpeechToTextRequest request);
+
+    String recognizeAudioOGG(String audio);
+
+    String recognizeAudioMP3(String audio);
 }

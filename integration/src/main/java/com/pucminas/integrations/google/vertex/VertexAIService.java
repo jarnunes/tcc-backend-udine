@@ -11,4 +11,6 @@ public interface VertexAIService {
     String generateLocationDescription(List<String> locationsName);
 
     String generateLocationDescription(String locationName);
+
+    String answerQuestion(String questionPrompt);
 }

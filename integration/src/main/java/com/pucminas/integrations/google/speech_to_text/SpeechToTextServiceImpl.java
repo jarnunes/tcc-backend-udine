@@ -1,18 +1,18 @@
 package com.pucminas.integrations.google.speech_to_text;
 
+import com.pucminas.integrations.google.speech_to_text.dto.AudioEncodingType;
 import com.pucminas.integrations.google.speech_to_text.dto.Result;
 import com.pucminas.integrations.google.speech_to_text.dto.SpeechToTextRequest;
 import com.pucminas.integrations.google.speech_to_text.dto.SpeechToTextResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
-// https://cloudconvert.com/ogg-to-wav
 
-@Service
+@Component
 public class SpeechToTextServiceImpl implements SpeechToTextService {
 
     private STTProperties properties;
@@ -22,10 +22,8 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
         this.properties = properties;
     }
 
-
-    public String recognize(String audio) {
-        final SpeechToTextRequest request = new SpeechToTextRequest(audio);
-
+    @Override
+    public String recognizeAudio(SpeechToTextRequest request) {
         return WebClient.builder().baseUrl(properties.getBaseURI()).build()
                 .post().uri(uriBuilder -> uriBuilder
                         .path(properties.getPath())
@@ -40,11 +38,24 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
                 .block();
     }
 
+    @Override
+    public String recognizeAudioOGG(String audio) {
+        return recognizeAudio(new SpeechToTextRequest(audio));
+    }
+
+    @Override
+    public String recognizeAudioMP3(String audio) {
+        final SpeechToTextRequest request = new SpeechToTextRequest(audio);
+        request.getConfig().setEncoding(AudioEncodingType.MP3);
+        return recognizeAudio(new SpeechToTextRequest(audio));
+    }
+
     private String getTranscript(List<Result> results) {
         if (results != null && !results.isEmpty()) {
             Result result = results.get(0);
             return result.getAlternatives().get(0).getTranscript();
         }
+        //TODO: Retornar uma mensagem significativa
         return "";
     }
 

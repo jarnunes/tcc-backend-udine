@@ -1,35 +1,30 @@
 package com.pucminas.integrations.google.vertex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pucminas.Message;
 import com.pucminas.integrations.google.vertex.dto.GeminiCandidate;
 import com.pucminas.integrations.google.vertex.dto.GeminiPart;
 import com.pucminas.integrations.google.vertex.dto.GeminiRequest;
 import com.pucminas.integrations.google.vertex.dto.GeminiResponse;
+import com.pucminas.utils.MessageUtils;
+import com.pucminas.utils.StrUtils;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
-@Service
+@Component
 @CommonsLog
 public class VertexAIServiceImpl implements VertexAIService {
 
     private VertexProperties vertexProperties;
-    private Message message;
 
     @Autowired
     public void setVertexProperties(VertexProperties properties) {
         this.vertexProperties = properties;
-    }
-
-    @Autowired
-    public void setMessage(Message messageIn) {
-        this.message = messageIn;
     }
 
     @Override
@@ -43,13 +38,13 @@ public class VertexAIServiceImpl implements VertexAIService {
         // Converte o objeto para uma string JSON
         try {
             String jsonString = objectMapper.writeValueAsString(geminiRequest);
-            log.info("JSON: " + jsonString);
+            log.debug("JSON: " + jsonString);
         }catch (Exception e) {
             log.error("Error: " + e.getMessage());
         }
 
         WebClient cliente =  WebClient.builder().baseUrl(vertexProperties.getGeminiUrl()).build();
-        log.info("URL: " + vertexProperties.getGeminiUrl());
+        log.debug("URL: " + vertexProperties.getGeminiUrl());
 
         return cliente
                 .post()
@@ -62,15 +57,21 @@ public class VertexAIServiceImpl implements VertexAIService {
 
     @Override
     public String generateLocationDescription(String locationName) {
-        final String prompt = message.get("vertex-ai.gemini.location.description.prompt", locationName);
+        final String prompt = MessageUtils.get("vertex-ai.gemini.generate.location.short.description.prompt", locationName);
         final GeminiResponse response = processPrompt(prompt);
         return processGeminiResponse(response);
     }
 
     @Override
     public String generateLocationDescription(List<String> locationsName) {
-        final String prompt = message.get("vertex-ai.gemini.location.list.description.prompt", String.join(", ", locationsName));
+        final String prompt = MessageUtils.get("vertex-ai.gemini.generate.locations.short.description.prompt", StrUtils.joinComma(locationsName));
         final GeminiResponse response = processPrompt(prompt);
+        return processGeminiResponse(response);
+    }
+
+    @Override
+    public String answerQuestion(String questionPrompt) {
+        final GeminiResponse response = processPrompt(questionPrompt);
         return processGeminiResponse(response);
     }
 
