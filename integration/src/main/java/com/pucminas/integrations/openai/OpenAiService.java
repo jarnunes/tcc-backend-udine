@@ -1,12 +1,9 @@
 package com.pucminas.integrations.openai;
 
-import java.util.List;
+import com.pucminas.integrations.LlmService;
 
-public interface OpenAiService {
+public interface OpenAiService extends LlmService {
 
     String processPrompt(String prompt);
 
-    String generateText(String prompt);
-
-    String generateLocationDescription(List<String> locationsName);
 }

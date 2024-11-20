@@ -3,6 +3,7 @@ package com.pucminas.function.functions;
 import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
 import com.pucminas.integrations.google.tech_to_speech.dto.TextToSpeechResponse;
 import com.pucminas.integrations.google.vertex.VertexAIService;
+import com.pucminas.integrations.openai.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +11,12 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component
-public class GenerateAudioDescriptionFromPlacesName implements Function<List<String>, TextToSpeechResponse> {
+public class GenerateShortAudioDescriptionFromPlacesName implements Function<List<String>, TextToSpeechResponse> {
+
 
     private VertexAIService vertexAIService;
     private TextToSpeechService textToSpeechService;
+    private OpenAiService openAiService;
 
     @Autowired
     public void setVertexAIService(VertexAIService service) {
@@ -25,10 +28,14 @@ public class GenerateAudioDescriptionFromPlacesName implements Function<List<Str
         this.textToSpeechService = service;
     }
 
+    @Autowired
+    public void setOpenAiService(OpenAiService openAiService) {
+        this.openAiService = openAiService;
+    }
+
     @Override
     public TextToSpeechResponse apply(List<String> placesNames) {
-        //final String fixDes = "A Praça Raul Soares, coração de Belo Horizonte, encanta com sua arquitetura clássica e o imponente Teatro Francisco Nunes.  Um espaço vibrante, ideal para um passeio tranquilo e apreciação da beleza urbana.\n\nA Praça da Estação, revitalizada e moderna,  resgata a memória ferroviária da cidade, combinando história e lazer em um ambiente acolhedor, perfeito para um encontro ou relaxamento.\n\nO Parque Municipal, um verdadeiro oásis verde no meio da cidade, oferece amplos espaços para atividades ao ar livre, trilhas e contato com a natureza. Um refúgio urbano para recarregar as energias.\n";
-        final String description = vertexAIService.generateLocationDescription(placesNames);
+        final String description = openAiService.generateShortDescription(placesNames);
         return textToSpeechService.synthesizeText(description);
     }
 }

@@ -1,6 +1,5 @@
 package com.pucminas.integrations.google.places;
 
-import com.pucminas.Message;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
 import com.pucminas.integrations.google.places.dto.PlacesRequest;
 import com.pucminas.integrations.google.places.dto.PlacesResponse;
@@ -35,6 +34,7 @@ public class PlacesServiceImpl implements PlacesService {
                         .queryParam("type", request.getType())
                         .queryParam("key", properties.getGooglePlacesApiKey())
                         .build())
+                .header("Accept-Language", "pt")
                 .retrieve()
                 .bodyToMono(PlacesResponse.class)
                 .block();

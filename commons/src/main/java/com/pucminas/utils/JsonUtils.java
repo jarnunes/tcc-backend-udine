@@ -35,4 +35,5 @@ public class JsonUtils {
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
     }
+
 }

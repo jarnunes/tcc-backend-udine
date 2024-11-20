@@ -1,24 +1,20 @@
 package com.pucminas.integrations.google.vertex;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pucminas.integrations.IntegrationServiceBase;
 import com.pucminas.integrations.google.vertex.dto.GeminiCandidate;
 import com.pucminas.integrations.google.vertex.dto.GeminiPart;
 import com.pucminas.integrations.google.vertex.dto.GeminiRequest;
 import com.pucminas.integrations.google.vertex.dto.GeminiResponse;
 import com.pucminas.utils.MessageUtils;
 import com.pucminas.utils.StrUtils;
-import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
 @Component
-@CommonsLog
-public class VertexAIServiceImpl implements VertexAIService {
+public class VertexAIServiceImpl extends IntegrationServiceBase implements VertexAIService {
 
     private VertexProperties vertexProperties;
 
@@ -29,42 +25,25 @@ public class VertexAIServiceImpl implements VertexAIService {
 
     @Override
     public GeminiResponse processPrompt(final String prompt) {
-        log.info("Prompt: " + prompt);
-
         final GeminiRequest geminiRequest = GeminiRequest.GeminiRequestBuilder.prompt(prompt).build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
 
-        // Converte o objeto para uma string JSON
-        try {
-            String jsonString = objectMapper.writeValueAsString(geminiRequest);
-            log.debug("JSON: " + jsonString);
-        }catch (Exception e) {
-            log.error("Error: " + e.getMessage());
-        }
-
-        WebClient cliente =  WebClient.builder().baseUrl(vertexProperties.getGeminiUrl()).build();
-        log.debug("URL: " + vertexProperties.getGeminiUrl());
-
-        return cliente
-                .post()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(geminiRequest))
-                .retrieve()
-                .bodyToMono(GeminiResponse.class)
-                .block();
+        return proccess("Serviço Google VertexAI", geminiRequest, vertexProperties.getConnectionsAttempt(),
+                vertexProperties.getGeminiUrl(), GeminiResponse.class, clientBuilder -> {
+                }, WebClient::post,
+                mono -> mono);
     }
 
     @Override
-    public String generateLocationDescription(String locationName) {
-        final String prompt = MessageUtils.get("vertex-ai.gemini.generate.location.short.description.prompt", locationName);
+    public String generateShortDescription(List<String> locationsName) {
+        final String prompt = MessageUtils.get("vertex-ai.gemini.generate.locations.short.description.prompt", StrUtils.joinComma(locationsName));
         final GeminiResponse response = processPrompt(prompt);
         return processGeminiResponse(response);
     }
 
     @Override
-    public String generateLocationDescription(List<String> locationsName) {
-        final String prompt = MessageUtils.get("vertex-ai.gemini.generate.locations.short.description.prompt", StrUtils.joinComma(locationsName));
+    public String generateShortDescription(String locationName) {
+        final String prompt = MessageUtils.get("vertex-ai.gemini.generate.location.short.description.prompt", locationName);
         final GeminiResponse response = processPrompt(prompt);
         return processGeminiResponse(response);
     }
@@ -76,9 +55,12 @@ public class VertexAIServiceImpl implements VertexAIService {
     }
 
     private String processGeminiResponse(final GeminiResponse response) {
-        return response.getCandidates().stream().findFirst().map(GeminiCandidate::getContent)
-            .map(it -> it.getParts().stream().iterator().next()).map(GeminiPart::getText)
-            .orElse(null);
+        return response.getCandidates().stream().findFirst()
+                .map(GeminiCandidate::getContent)
+                .map(it -> it.getParts().stream().iterator().next())
+                .map(GeminiPart::getText)
+                .map(StrUtils::removeMarkdownFormatting)
+                .orElse("Nenhum texto retornado pelo Gemini.");
     }
 
 }

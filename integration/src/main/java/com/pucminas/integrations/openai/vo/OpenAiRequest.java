@@ -6,19 +6,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class OpenAiRequest {
-    String model = "text-davinci-003";
+    private String model = "gpt-4";
 
-    String prompt;
+    private List<MessageRequest> messages = new ArrayList<>();
 
     @JsonProperty("max_tokens")
-    int maxTokens = 150;
+    private int maxTokens = 150;
+    private double temperature = 0.7;
 
     public OpenAiRequest(String prompt) {
-        this.prompt = prompt;
+        this.messages.add(new MessageRequest(prompt));
     }
 }

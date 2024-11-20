@@ -13,11 +13,14 @@ public class VertexProperties {
     @Value("${udine.vertex.gemini.url}")
     private String geminiUrl;
 
-    @Value("${udine.vertex.gemini.apiKey}")
+    @Value("${udine.vertex.gemini.api-key}")
     private String geminiApiKey;
 
     @Value("${udine.vertex.gemini.name.param.apiKey:key}")
     private String geminiApiNameParamApiKey;
+
+    @Value("${udine.vertex.gemini.connections-attempt}")
+    private Integer connectionsAttempt = 3;
 
     public String getGeminiUrl() {
         final StringBuilder geminiUrl = new StringBuilder(this.geminiUrl);

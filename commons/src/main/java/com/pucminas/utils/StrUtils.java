@@ -11,4 +11,8 @@ public class StrUtils {
         return String.join(", ", values);
     }
 
+    public static String removeMarkdownFormatting(String value) {
+        return value.replace("\\*+", "");
+    }
+
 }

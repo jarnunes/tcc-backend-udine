@@ -38,7 +38,7 @@ public class TextToSpeechRequest {
         }
 
         private void withVoice() {
-            request.setVoice(new Voice("pt-BR", null));
+            request.setVoice(new Voice("pt-BR", "pt-BR-Wavenet-A", "FEMALE"));
         }
 
         public TextToSpeechRequest build() {

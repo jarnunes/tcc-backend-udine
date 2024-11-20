@@ -24,4 +24,16 @@ public class GeminiResponse {
         }
         this.candidates.add(candidate);
     }
+
+    public static GeminiResponse create(String responseText) {
+        final GeminiContent content = new GeminiContent();
+        content.addPart(new GeminiPart(responseText));
+
+        final GeminiCandidate candidate = new GeminiCandidate();
+        candidate.setContent(content);
+
+        final GeminiResponse response = new GeminiResponse();
+        response.addCandidate(candidate);
+        return response;
+    }
 }

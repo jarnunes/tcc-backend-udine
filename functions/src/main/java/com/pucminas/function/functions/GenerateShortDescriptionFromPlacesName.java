@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component
-public class DescribeLocations implements Function<List<String>, String> {
+public class GenerateShortDescriptionFromPlacesName implements Function<List<String>, String> {
 
     private VertexAIService vertexService;
     private OpenAiService openAiService;
@@ -31,7 +31,6 @@ public class DescribeLocations implements Function<List<String>, String> {
         if (CollectionUtils.isEmpty(locationsName))
             return null;
 
-        return vertexService.generateLocationDescription(locationsName);
-//        return openAiService.generateLocationDescription(locationsName);
+        return openAiService.generateShortDescription(locationsName);
     }
 }

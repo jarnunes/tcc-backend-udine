@@ -13,4 +13,5 @@ public class Voice {
 
     private String languageCode;
     private String name;
+    private String ssmlGender;
 }

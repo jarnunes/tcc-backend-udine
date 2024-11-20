@@ -9,7 +9,8 @@ udine:
   vertex:
     gemini:
       url: ${VERTEX_GEMINI_URL}
-      apiKey: ${VERTEX_GEMINI_API_KEY}
+      api-key: ${VERTEX_GEMINI_API_KEY}
+      connections-attempt: ${VERTEX_GEMINI_CONNECTIONS_ATTEMPT:3}
       name:
         param:
           apiKey: ${VERTEX_GEMINI_NAME_PARAM_API_KEY:key}
@@ -32,6 +33,14 @@ udine:
     base-uri: ${SPEECH_TO_TEXT_BASE_URI:https://speech.googleapis.com}
     path: ${SPEECH_TO_TEXT_PATH:/v1/speech:recognize}
     apiKey: ${SPEECH_TO_TEXT_API_KEY}
+
   openai:
-    url: ${OPEN_AI_URL:https://api.openai.com/v1/completions}
+    url: ${OPEN_AI_URL:https://api.openai.com/v1/chat/completions}
     api-key: ${OPEN_AI_API_KEY}
+
+  wikipedia:
+    url: ${WIKIPEDIA_URL:https://pt.wikipedia.org/w/api.php}
+    action: ${WIKIPEDIA_ACTION:query}
+    format: ${WIKIPEDIA_FORMAT:json}
+    prop: ${WIKIPEDIA_PROP:extracts}
+    explaintext: ${WIKIPEDIA_EXPLAINTEXT:""}
