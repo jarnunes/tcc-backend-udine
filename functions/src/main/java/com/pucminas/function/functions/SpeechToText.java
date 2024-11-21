@@ -6,18 +6,23 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.UnaryOperator;
 
-@Component
-public class SpeechToText implements UnaryOperator<String> {
+//@Component
+public class SpeechToText extends FunctionBase implements UnaryOperator<String> {
 
     private SpeechToTextService service;
 
-    @Autowired
+//    @Autowired
     public void setService(SpeechToTextService service) {
         this.service = service;
     }
 
     @Override
     public String apply(String audio) {
-        return service.recognizeAudioOGG(audio);
+        return processRequest(audio, service::recognizeAudioMP3);
+    }
+
+    @Override
+    protected String serviceName() {
+        return "SpeechToText";
     }
 }

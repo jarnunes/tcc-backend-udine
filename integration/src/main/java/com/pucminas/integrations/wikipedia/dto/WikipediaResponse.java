@@ -1,4 +1,4 @@
 package com.pucminas.integrations.wikipedia.dto;
 
-public record WikipediaResponse(Query query) {
+public record WikipediaResponse(QueryPagesResponse query) {
 }

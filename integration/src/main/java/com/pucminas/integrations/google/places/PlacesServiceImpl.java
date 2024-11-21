@@ -1,5 +1,8 @@
 package com.pucminas.integrations.google.places;
 
+import com.pucminas.integrations.CacheService;
+import com.pucminas.integrations.google.geocode.GeocodeService;
+import com.pucminas.integrations.google.places.dto.Location;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
 import com.pucminas.integrations.google.places.dto.PlacesRequest;
 import com.pucminas.integrations.google.places.dto.PlacesResponse;
@@ -15,15 +18,31 @@ import java.util.List;
 @CommonsLog
 public class PlacesServiceImpl implements PlacesService {
     private PlacesProperties properties;
-
+    private GeocodeService geocodeService;
+    private CacheService cacheService;
 
     @Autowired
     public void setProperties(PlacesProperties properties) {
         this.properties = properties;
     }
 
+    @Autowired
+    public void setGeocodeService(GeocodeService geocodeService) {
+        this.geocodeService = geocodeService;
+    }
+
+    @Autowired
+    public void setCacheService(CacheService cacheService) {
+        this.cacheService = cacheService;
+    }
+
     @Override
     public PlacesResponse getNearbyPlaces(PlacesRequest request) {
+        return cacheService.getCacheValueOrNew(getClass(), "KEY_PLACES_SERVICE_NEARBY_PLACES", request,
+            this::getNearbyPlacesLocation);
+    }
+
+    private PlacesResponse getNearbyPlacesLocation(PlacesRequest request) {
         return WebClient.builder()
                 .baseUrl(properties.getUrl())
                 .build().get()
@@ -42,18 +61,30 @@ public class PlacesServiceImpl implements PlacesService {
 
     @Override
     public PlaceDetailResponse getPlaceDetails(String placeId) {
-        return WebClient.builder()
+        return cacheService.getCacheValueOrNew(getClass(), "KEY_PLACES_SERVICE_PLACES_DETAILS", placeId,
+                this::findPlaceDetailsById);
+    }
+
+    private PlaceDetailResponse findPlaceDetailsById(String placeID) {
+        PlaceDetailResponse response = WebClient.builder()
                 .baseUrl(properties.getUrl())
                 .build().get()
                 .uri(uriBuilder -> uriBuilder
                         .path(properties.getDetailsPath())
-                        .queryParam("place_id", placeId)
+                        .queryParam("place_id", placeID)
                         .queryParam("key", properties.getGooglePlacesApiKey())
                         .build())
                 .header("Accept-Language", "pt")
                 .retrieve()
                 .bodyToMono(PlaceDetailResponse.class)
                 .block();
+
+        if (response != null) {
+            final Location location = response.getResult().getGeometry().getLocation();
+            final String city = geocodeService.getCityName(location.getLat(), location.getLng());
+            response.getResult().setCity(city);
+        }
+        return response;
     }
 
     @Override

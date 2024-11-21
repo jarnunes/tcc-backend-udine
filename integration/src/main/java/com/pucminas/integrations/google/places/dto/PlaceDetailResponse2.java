@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
-
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class PlacesResponse {
-    List<Place> results = new ArrayList<>();
+@NoArgsConstructor
+public class PlaceDetailResponse2 {
+
+    List<String> html_attributions;
+    PlaceDetailResult resul;
 }

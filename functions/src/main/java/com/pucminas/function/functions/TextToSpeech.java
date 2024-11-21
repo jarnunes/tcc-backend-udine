@@ -7,18 +7,23 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-@Component
-public class TextToSpeech implements Function<String, TextToSpeechResponse> {
+//@Component
+public class TextToSpeech extends FunctionBase implements Function<String, TextToSpeechResponse> {
 
     private TextToSpeechService service;
 
-    @Autowired
+//    @Autowired
     public void setTextToSpeechService(TextToSpeechService service) {
         this.service = service;
     }
 
     @Override
     public TextToSpeechResponse apply(String text) {
-        return service.synthesizeText(text);
+        return processRequest(text, service::synthesizeText);
+    }
+
+    @Override
+    protected String serviceName() {
+        return "TextToSpeech";
     }
 }

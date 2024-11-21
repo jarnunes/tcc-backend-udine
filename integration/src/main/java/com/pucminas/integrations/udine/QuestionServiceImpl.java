@@ -3,6 +3,7 @@ package com.pucminas.integrations.udine;
 import com.pucminas.integrations.google.places.PlacesService;
 import com.pucminas.integrations.google.places.dto.OpeningHours;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
+import com.pucminas.integrations.google.places.dto.PlaceDetailResult;
 import com.pucminas.integrations.google.speech_to_text.SpeechToTextService;
 import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
 import com.pucminas.integrations.openai.OpenAiService;
@@ -14,14 +15,17 @@ import com.pucminas.integrations.wikipedia.WikipediaService;
 import com.pucminas.utils.JsonUtils;
 import com.pucminas.utils.ListUtils;
 import com.pucminas.utils.MessageUtils;
+import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
+@CommonsLog
 public class QuestionServiceImpl implements QuestionService {
 
     private PlacesService placesService;
@@ -59,12 +63,12 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionResponse answerQuestion(QuestionRequest questionRequest) {
         final List<PlaceDetails> placeDetails = new ArrayList<>();
 
-        questionRequest.placesId().parallelStream().map(placesService::getPlaceDetails).map(PlaceDetailResponse::result)
+        questionRequest.placesId().stream().map(placesService::getPlaceDetails).map(PlaceDetailResponse::getResult)
                 .forEach(placeResult -> {
-                    final List<String> weekdayText = ListUtils.valueOrEmpty(placeResult.opening_hours(), OpeningHours::weekday_text);
-                    final String wikipediaText = wikipediaService.getWikipediaText(placeResult.name());
-                    final PlaceDetails details = new PlaceDetails(placeResult.name(), placeResult.vicinity(),
-                        placeResult.rating(), weekdayText, wikipediaText, placeResult.types());
+                    final List<String> weekdayText = ListUtils.valueOrEmpty(placeResult.getOpeningHours(), OpeningHours::getWeekdayText);
+                    final String wikipediaText = getLocationDescription(placeResult);
+                    final PlaceDetails details = new PlaceDetails(placeResult.getName(), placeResult.getVicinity(),
+                        placeResult.getRating(), weekdayText, wikipediaText, placeResult.getTypes());
                     placeDetails.add(details);
                 });
 
@@ -79,6 +83,27 @@ public class QuestionServiceImpl implements QuestionService {
             return new QuestionResponse(textToSpeechService.synthesizeText(answered).getAudioContent(), QuestionFormatType.AUDIO);
         }
         return new QuestionResponse("Não foi possível entender o audio enviado. Verifique a qualidade da gravação e tente novamente.", QuestionFormatType.TEXT);
+    }
+
+    /**
+     * Returns location description from wikipedia or site scraping
+     * @return String
+     */
+    private String getLocationDescription(PlaceDetailResult place){
+        final String wikipediaText = wikipediaService.getWikipediaText(place.getName());
+        if(StringUtils.isNotBlank(wikipediaText)
+            && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.search.title.error", place.getName()))
+            && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.title.not.found", place.getName())))
+        {
+            return wikipediaText;
+        }
+
+        final String nearestTitle = wikipediaService.getNearestWikipediaTitle(Arrays.asList(place.getName(), place.getCity()));
+        if(StringUtils.isBlank(nearestTitle)){
+            return MessageUtils.get("wikipedia.title.not.found", place.getName());
+        }
+
+        return wikipediaService.getWikipediaText(nearestTitle);
     }
 
     private String getUserQuestion(QuestionRequest questionRequest) {

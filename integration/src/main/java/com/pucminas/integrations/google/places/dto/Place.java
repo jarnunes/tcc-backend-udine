@@ -14,17 +14,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Place {
+    String name;
 
-    private String name;
-    private String vicinity;
+    String vicinity;
 
     @JsonProperty("place_id")
-    private String placeId;
+    String placeId;
 
-    private List<String> types = new ArrayList<>();
-    private Geometry geometry;
+    List<String> types = new ArrayList<>();
 
-    @JsonProperty("icon")
-    private String uriIcon;
+    Geometry geometry;
 
+    @JsonProperty("uri_icon")
+    String uriIcon;
 }

@@ -1,6 +1,7 @@
 package com.pucminas.utils;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class StrUtils {
 
@@ -8,7 +9,11 @@ public class StrUtils {
     }
 
     public static String joinComma(List<String> values) {
-        return String.join(", ", values);
+        return String.join(",", values);
+    }
+
+    public static String joinObjects(Object... values) {
+        return String.join(",", Stream.of(values).map(Object::toString).toList());
     }
 
     public static String removeMarkdownFormatting(String value) {

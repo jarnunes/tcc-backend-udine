@@ -1,6 +1,19 @@
 package com.pucminas.integrations.google.places.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public record OpeningHours(List<String> weekday_text) {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class OpeningHours {
+    @JsonProperty("weekday_text")
+    List<String> weekdayText = new ArrayList<>();
 }

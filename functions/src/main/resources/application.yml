@@ -23,6 +23,9 @@ udine:
       types:
         - tourist_attraction
         - park
+  geocode:
+    url: ${GEOCODE_URL:https://maps.googleapis.com/maps/api/geocode/json}
+    api-key: ${GEOCODE_API_KEY}
 
   text-to-speech:
     base-uri: ${TEXT_TO_SPEECH_BASE_URI:https://texttospeech.googleapis.com}

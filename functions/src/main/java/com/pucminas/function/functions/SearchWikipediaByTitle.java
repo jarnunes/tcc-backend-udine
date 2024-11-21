@@ -8,18 +8,33 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.UnaryOperator;
 
-@Component
-public class SearchWikipediaByTitle implements UnaryOperator<String> {
+//@Component
+public class SearchWikipediaByTitle extends FunctionBase implements UnaryOperator<String> {
 
     private final WikipediaService service;
 
-    @Autowired
+//    @Autowired
     public SearchWikipediaByTitle(WikipediaService service) {
         this.service = service;
     }
 
     @Override
     public String apply(String s) {
-        return StringUtils.isEmpty(s) ? MessageUtils.get("wikipedia.empty.title") : service.getWikipediaText(s);
+        logRequest(s);
+
+        if(StringUtils.isEmpty(s)) {
+            return MessageUtils.get("wikipedia.empty.title");
+        }
+
+        final String response = service.getWikipediaText(s);
+        logResponse(response);
+
+        return response;
+    }
+
+
+    @Override
+    protected String serviceName() {
+        return "SearchWikipediaByTitle";
     }
 }

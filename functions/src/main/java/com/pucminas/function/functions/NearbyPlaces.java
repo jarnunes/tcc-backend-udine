@@ -8,18 +8,23 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-@Component
-public class NearbyPlaces implements Function<PlacesRequest, PlacesResponse> {
+//@Component
+public class NearbyPlaces extends FunctionBase implements Function<PlacesRequest, PlacesResponse> {
 
     private PlacesService placesService;
 
-    @Autowired
+//    @Autowired
     public void setPlacesService(PlacesService service) {
         this.placesService = service;
     }
 
     @Override
     public PlacesResponse apply(PlacesRequest request) {
-        return placesService.getNearbyPlaces(request);
+        return super.processRequest(request, placesService::getNearbyPlaces);
+    }
+
+    @Override
+    protected String serviceName() {
+        return "NearbyPlaces";
     }
 }

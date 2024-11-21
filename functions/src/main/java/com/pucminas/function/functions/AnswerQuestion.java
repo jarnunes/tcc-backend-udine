@@ -8,18 +8,24 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
-@Component
-public class AnswerQuestion implements Function<QuestionRequest, QuestionResponse> {
+//@Component
+public class AnswerQuestion extends FunctionBase implements Function<QuestionRequest, QuestionResponse> {
 
     private QuestionServiceImpl questionService;
 
-    @Autowired
+//    @Autowired
     public void setQuestionService(QuestionServiceImpl questionService) {
         this.questionService = questionService;
     }
 
     @Override
     public QuestionResponse apply(QuestionRequest request) {
-        return questionService.answerQuestion(request);
+        return super.processRequest(request, questionService::answerQuestion);
     }
+
+    @Override
+    protected String serviceName() {
+        return "AnswerQuestion";
+    }
+
 }

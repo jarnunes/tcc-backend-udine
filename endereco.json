@@ -1,0 +1,1018 @@
+{
+  "plus_code": {
+    "compound_code": "33H4+266 Belo Horizonte, MG, Brasil",
+    "global_code": "58GR33H4+266"
+  },
+  "results": [
+    {
+      "address_components": [
+        {
+          "long_name": "1227",
+          "short_name": "1227",
+          "types": [
+            "street_number"
+          ]
+        },
+        {
+          "long_name": "Avenida Amazonas",
+          "short_name": "Av. Amazonas",
+          "types": [
+            "route"
+          ]
+        },
+        {
+          "long_name": "Centro",
+          "short_name": "Centro",
+          "types": [
+            "political",
+            "sublocality",
+            "sublocality_level_1"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        },
+        {
+          "long_name": "30180-002",
+          "short_name": "30180-002",
+          "types": [
+            "postal_code"
+          ]
+        }
+      ],
+      "formatted_address": "Av. Amazonas, 1227 - Centro, Belo Horizonte - MG, 30180-002, Brasil",
+      "geometry": {
+        "location": {
+          "lat": -19.9224664,
+          "lng": -43.94422549999999
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": -19.92111741970849,
+            "lng": -43.94287651970849
+          },
+          "southwest": {
+            "lat": -19.9238153802915,
+            "lng": -43.94557448029149
+          }
+        }
+      },
+      "place_id": "ChIJU9o8sFiXpgARV7ULr92QHtY",
+      "plus_code": {
+        "compound_code": "33H4+28 Centro, Belo Horizonte - MG, Brasil",
+        "global_code": "58GR33H4+28"
+      },
+      "types": [
+        "street_address"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "1049",
+          "short_name": "1049",
+          "types": [
+            "street_number"
+          ]
+        },
+        {
+          "long_name": "Avenida Amazonas",
+          "short_name": "Av. Amazonas",
+          "types": [
+            "route"
+          ]
+        },
+        {
+          "long_name": "Centro",
+          "short_name": "Centro",
+          "types": [
+            "political",
+            "sublocality",
+            "sublocality_level_1"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        },
+        {
+          "long_name": "30180-000",
+          "short_name": "30180-000",
+          "types": [
+            "postal_code"
+          ]
+        }
+      ],
+      "formatted_address": "Av. Amazonas, 1049 - Centro, Belo Horizonte - MG, 30180-000, Brasil",
+      "geometry": {
+        "location": {
+          "lat": -19.9224686,
+          "lng": -43.9442272
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9211196197085,
+            "lng": -43.9428782197085
+          },
+          "southwest": {
+            "lat": -19.9238175802915,
+            "lng": -43.9455761802915
+          }
+        }
+      },
+      "place_id": "ChIJf2FVmRGXpgARsBP9haVjG8k",
+      "plus_code": {
+        "compound_code": "33H4+28 Centro, Belo Horizonte - MG, Brasil",
+        "global_code": "58GR33H4+28"
+      },
+      "types": [
+        "bar",
+        "establishment",
+        "point_of_interest"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "473",
+          "short_name": "473",
+          "types": [
+            "street_number"
+          ]
+        },
+        {
+          "long_name": "Praça Raul Soares",
+          "short_name": "Praça Raul Soares",
+          "types": [
+            "route"
+          ]
+        },
+        {
+          "long_name": "Centro",
+          "short_name": "Centro",
+          "types": [
+            "political",
+            "sublocality",
+            "sublocality_level_1"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        },
+        {
+          "long_name": "30180-030",
+          "short_name": "30180-030",
+          "types": [
+            "postal_code"
+          ]
+        }
+      ],
+      "formatted_address": "Praça Raul Soares, 473 - Centro, Belo Horizonte - MG, 30180-030, Brasil",
+      "geometry": {
+        "location": {
+          "lat": -19.9224083,
+          "lng": -43.9443507
+        },
+        "location_type": "RANGE_INTERPOLATED",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9210593197085,
+            "lng": -43.9430017197085
+          },
+          "southwest": {
+            "lat": -19.9237572802915,
+            "lng": -43.9456996802915
+          }
+        }
+      },
+      "place_id": "EkhQcmHDp2EgUmF1bCBTb2FyZXMsIDQ3MyAtIENlbnRybywgQmVsbyBIb3Jpem9udGUgLSBNRywgMzAxODAtMDMwLCBCcmF6aWwiGxIZChQKEgmfbm-wWJemABF4UlfNUJID0BDZAw",
+      "types": [
+        "street_address"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Praça Raul Soares",
+          "short_name": "Praça Raul Soares",
+          "types": [
+            "route"
+          ]
+        },
+        {
+          "long_name": "Centro",
+          "short_name": "Centro",
+          "types": [
+            "political",
+            "sublocality",
+            "sublocality_level_1"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        },
+        {
+          "long_name": "30180-030",
+          "short_name": "30180-030",
+          "types": [
+            "postal_code"
+          ]
+        }
+      ],
+      "formatted_address": "Praça Raul Soares - Centro, Belo Horizonte - MG, 30180-030, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.9223766,
+            "lng": -43.9444358
+          },
+          "southwest": {
+            "lat": -19.9226034,
+            "lng": -43.9445326
+          }
+        },
+        "location": {
+          "lat": -19.9224858,
+          "lng": -43.944473
+        },
+        "location_type": "GEOMETRIC_CENTER",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9211410197085,
+            "lng": -43.9431352197085
+          },
+          "southwest": {
+            "lat": -19.9238389802915,
+            "lng": -43.9458331802915
+          }
+        }
+      },
+      "place_id": "ChIJbVEqsViXpgAROv2whFfjsSQ",
+      "types": [
+        "route"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "33H4+26",
+          "short_name": "33H4+26",
+          "types": [
+            "plus_code"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "33H4+26 Belo Horizonte, MG, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.922375,
+            "lng": -43.944375
+          },
+          "southwest": {
+            "lat": -19.9225,
+            "lng": -43.9445
+          }
+        },
+        "location": {
+          "lat": -19.9224672,
+          "lng": -43.9444787
+        },
+        "location_type": "GEOMETRIC_CENTER",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9210885197085,
+            "lng": -43.9430885197085
+          },
+          "southwest": {
+            "lat": -19.9237864802915,
+            "lng": -43.9457864802915
+          }
+        }
+      },
+      "place_id": "GhIJ-KF3zybsM8ARYSKUreT4RcA",
+      "plus_code": {
+        "compound_code": "33H4+26 Belo Horizonte, MG, Brasil",
+        "global_code": "58GR33H4+26"
+      },
+      "types": [
+        "plus_code"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "30180-030",
+          "short_name": "30180-030",
+          "types": [
+            "postal_code"
+          ]
+        },
+        {
+          "long_name": "Praça Raul Soares",
+          "short_name": "Praça Raul Soares",
+          "types": [
+            "route"
+          ]
+        },
+        {
+          "long_name": "Centro",
+          "short_name": "Centro",
+          "types": [
+            "political",
+            "sublocality",
+            "sublocality_level_1"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Praça Raul Soares - Centro, Belo Horizonte - MG, 30180-030, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.9212005,
+            "lng": -43.9424867
+          },
+          "southwest": {
+            "lat": -19.927006,
+            "lng": -43.9472552
+          }
+        },
+        "location": {
+          "lat": -19.9229779,
+          "lng": -43.9457501
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9212005,
+            "lng": -43.9424867
+          },
+          "southwest": {
+            "lat": -19.927006,
+            "lng": -43.9472552
+          }
+        }
+      },
+      "place_id": "ChIJY2yiNl-XpgAR7PkYoWEk4Uc",
+      "types": [
+        "postal_code"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "30160",
+          "short_name": "30160",
+          "types": [
+            "postal_code",
+            "postal_code_prefix"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_4",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Belo Horizonte, MG, 30160, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.9198004,
+            "lng": -43.9332366
+          },
+          "southwest": {
+            "lat": -19.9332631,
+            "lng": -43.9450386
+          }
+        },
+        "location": {
+          "lat": -19.9253916,
+          "lng": -43.9401023
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9198004,
+            "lng": -43.9332366
+          },
+          "southwest": {
+            "lat": -19.9332631,
+            "lng": -43.9450386
+          }
+        }
+      },
+      "place_id": "ChIJ2bwSLOGZpgARAEhEsDvmJ5Y",
+      "types": [
+        "postal_code",
+        "postal_code_prefix"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Centro",
+          "short_name": "Centro",
+          "types": [
+            "political",
+            "sublocality",
+            "sublocality_level_1"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Centro, Belo Horizonte - MG, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.9120977,
+            "lng": -43.9310672
+          },
+          "southwest": {
+            "lat": -19.9271463,
+            "lng": -43.948251
+          }
+        },
+        "location": {
+          "lat": -19.919168,
+          "lng": -43.9386558
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9120977,
+            "lng": -43.9310672
+          },
+          "southwest": {
+            "lat": -19.9271463,
+            "lng": -43.948251
+          }
+        }
+      },
+      "place_id": "ChIJh6MZ4eSZpgARxD-_SrHADdA",
+      "types": [
+        "political",
+        "sublocality",
+        "sublocality_level_1"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Centro-Sul",
+          "short_name": "Centro-Sul",
+          "types": [
+            "neighborhood",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_4",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Centro-Sul - Belo Horizonte, MG, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.9118909,
+            "lng": -43.8902028
+          },
+          "southwest": {
+            "lat": -19.9824785,
+            "lng": -43.96132100000001
+          }
+        },
+        "location": {
+          "lat": -19.9331308,
+          "lng": -43.9377399
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.9118909,
+            "lng": -43.8902028
+          },
+          "southwest": {
+            "lat": -19.9824785,
+            "lng": -43.96132100000001
+          }
+        }
+      },
+      "place_id": "ChIJOxKv9MmZpgARZd9-wJP_XX0",
+      "types": [
+        "neighborhood",
+        "political"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_4",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Belo Horizonte, MG, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.8247054,
+            "lng": -43.86890700000001
+          },
+          "southwest": {
+            "lat": -20.0034031,
+            "lng": -44.0282549
+          }
+        },
+        "location": {
+          "lat": -19.9219227,
+          "lng": -43.9627492
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.8247054,
+            "lng": -43.86890700000001
+          },
+          "southwest": {
+            "lat": -20.0034031,
+            "lng": -44.0282549
+          }
+        }
+      },
+      "place_id": "ChIJqUYJLVGXpgARYnSSicZiqb4",
+      "types": [
+        "administrative_area_level_4",
+        "political"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "locality",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Belo Horizonte, MG, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.7763149,
+            "lng": -43.8647871
+          },
+          "southwest": {
+            "lat": -20.0291177,
+            "lng": -44.0633132
+          }
+        },
+        "location": {
+          "lat": -19.919052,
+          "lng": -43.9386685
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.7763149,
+            "lng": -43.8647871
+          },
+          "southwest": {
+            "lat": -20.0291177,
+            "lng": -44.0633132
+          }
+        }
+      },
+      "place_id": "ChIJMyzPysqQpgARlznSOl55NVs",
+      "types": [
+        "locality",
+        "political"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Belo Horizonte",
+          "short_name": "Belo Horizonte",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Belo Horizonte - MG, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -19.7764263,
+            "lng": -43.8572234
+          },
+          "southwest": {
+            "lat": -20.059699,
+            "lng": -44.0633406
+          }
+        },
+        "location": {
+          "lat": -19.9166602,
+          "lng": -43.9343894
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -19.7764263,
+            "lng": -43.8572234
+          },
+          "southwest": {
+            "lat": -20.059699,
+            "lng": -44.0633406
+          }
+        }
+      },
+      "place_id": "ChIJiUIyZaGQpgARff0Fu8gdHXA",
+      "types": [
+        "administrative_area_level_2",
+        "political"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Minas Gerais",
+          "short_name": "MG",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Minas Gerais, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -14.2331806,
+            "lng": -39.8568288
+          },
+          "southwest": {
+            "lat": -22.9227552,
+            "lng": -51.0460818
+          }
+        },
+        "location": {
+          "lat": -17.930178,
+          "lng": -43.7908453
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": -14.2331806,
+            "lng": -39.8568288
+          },
+          "southwest": {
+            "lat": -22.9227552,
+            "lng": -51.0460818
+          }
+        }
+      },
+      "place_id": "ChIJiUIyZaGQpgARs-edN8lwIRE",
+      "types": [
+        "administrative_area_level_1",
+        "political"
+      ]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": [
+            "country",
+            "political"
+          ]
+        }
+      ],
+      "formatted_address": "Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": 5.2700477,
+            "lng": -28.650543
+          },
+          "southwest": {
+            "lat": -34.0891,
+            "lng": -73.982817
+          }
+        },
+        "location": {
+          "lat": -14.235004,
+          "lng": -51.92528
+        },
+        "location_type": "APPROXIMATE",
+        "viewport": {
+          "northeast": {
+            "lat": 5.2700477,
+            "lng": -28.650543
+          },
+          "southwest": {
+            "lat": -34.0891,
+            "lng": -73.982817
+          }
+        }
+      },
+      "place_id": "ChIJzyjM68dZnAARYz4p8gYVWik",
+      "types": [
+        "country",
+        "political"
+      ]
+    }
+  ],
+  "status": "OK"
+}
