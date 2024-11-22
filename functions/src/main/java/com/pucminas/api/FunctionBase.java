@@ -1,6 +1,6 @@
 package com.pucminas.api;
 
-import com.pucminas.utils.JsonUtils;
+import com.pucminas.commons.utils.JsonUtils;
 import lombok.extern.apachecommons.CommonsLog;
 
 import java.util.function.Function;

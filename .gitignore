@@ -36,3 +36,4 @@ build/
 ### Udine ###
 */layer_content.zip
 */java/lib/*.jar
+/logs

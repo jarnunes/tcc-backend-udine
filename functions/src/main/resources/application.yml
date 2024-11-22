@@ -5,11 +5,25 @@ spring:
   application:
     name: UdineTour
 
+logging:
+  file:
+    name: 'logs/udine.log'
+    #  level:
+    #org.springframework.security: debug
+    #org.springframework.web: debug
+    ## Log dos requests HTTP (interfaces REST):
+    #org.springframework.web.filter.CommonsRequestLoggingFilter: debug
+
+  logback:
+    rollingpolicy:
+      max-history: 60
+      max-file-size: 10MB
+
 udine:
   vertex:
     gemini:
-      url: ${VERTEX_GEMINI_URL}
-      api-key: ${VERTEX_GEMINI_API_KEY}
+      url: ${VERTEX_GEMINI_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent}
+      api-key: ${VERTEX_GEMINI_API_KEY:EMPTY}
       connections-attempt: ${VERTEX_GEMINI_CONNECTIONS_ATTEMPT:3}
       name:
         param:
@@ -38,7 +52,8 @@ udine:
     apiKey: ${SPEECH_TO_TEXT_API_KEY}
 
   openai:
-    url: ${OPEN_AI_URL:https://api.openai.com/v1/chat/completions}
+    url: ${OPEN_AI_URL:https://api.openai.com}
+    path: ${OPEN_AI_PATH:/v1/chat/completions}
     api-key: ${OPEN_AI_API_KEY}
 
   wikipedia:
