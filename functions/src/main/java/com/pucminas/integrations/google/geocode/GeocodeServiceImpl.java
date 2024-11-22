@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 
 @Component
@@ -65,7 +67,11 @@ public class GeocodeServiceImpl extends ServiceBase implements GeocodeService {
     @ToString
     @NoArgsConstructor
     @AllArgsConstructor
-    private static class GeocodeParams {
+    private static class GeocodeParams implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1743479381381523373L;
+
         private  Double latitude;
         private  Double longitude;
 

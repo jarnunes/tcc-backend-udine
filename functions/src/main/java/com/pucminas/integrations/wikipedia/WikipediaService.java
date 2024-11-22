@@ -1,6 +1,6 @@
 package com.pucminas.integrations.wikipedia;
 
-import java.util.List;
+import com.pucminas.integrations.wikipedia.dto.SearchByTitleAndCity;
 
 // https://stackoverflow.com/questions/7185288/how-can-i-get-wikipedia-content-using-wikipedias-api
 public interface WikipediaService {
@@ -8,5 +8,5 @@ public interface WikipediaService {
 
     String getWikipediaText(String title);
 
-    String getNearestWikipediaTitle(List<String> searchKeys);
+    String getNearestWikipediaTitle(SearchByTitleAndCity filter);
 }

@@ -56,8 +56,10 @@ public abstract class ServiceBase {
             }
         } while (connectionsAttempted < connectionsAttempts);
 
-        throw new IntegrationException("integrations.error.consumer.service.exit", serviceName(),
-            connectionsAttempted, connectionsAttempts);
+//        throw new IntegrationException("integrations.error.consumer.service.exit", serviceName(),
+//            connectionsAttempted, connectionsAttempts);
+
+        return null;
     }
 
     private boolean isConnectException(Throwable e){

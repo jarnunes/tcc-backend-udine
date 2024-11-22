@@ -4,10 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class Config {
+public class Config implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 3999146952377829095L;
+
     private AudioEncodingType encoding;
     private Integer sampleRateHertz;
     private String languageCode;

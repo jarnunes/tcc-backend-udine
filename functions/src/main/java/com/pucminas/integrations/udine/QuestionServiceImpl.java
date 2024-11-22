@@ -1,5 +1,10 @@
 package com.pucminas.integrations.udine;
 
+import com.pucminas.commons.utils.JsonUtils;
+import com.pucminas.commons.utils.ListUtils;
+import com.pucminas.commons.utils.MessageUtils;
+import com.pucminas.integrations.CacheService;
+import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.places.PlacesService;
 import com.pucminas.integrations.google.places.dto.OpeningHours;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
@@ -12,27 +17,25 @@ import com.pucminas.integrations.udine.vo.QuestionFormatType;
 import com.pucminas.integrations.udine.vo.QuestionRequest;
 import com.pucminas.integrations.udine.vo.QuestionResponse;
 import com.pucminas.integrations.wikipedia.WikipediaService;
-import com.pucminas.commons.utils.JsonUtils;
-import com.pucminas.commons.utils.ListUtils;
-import com.pucminas.commons.utils.MessageUtils;
+import com.pucminas.integrations.wikipedia.dto.SearchByTitleAndCity;
 import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component
 @CommonsLog
-public class QuestionServiceImpl implements QuestionService {
+public class QuestionServiceImpl extends ServiceBase implements QuestionService {
 
     private PlacesService placesService;
     private SpeechToTextService speechToTextService;
     private TextToSpeechService textToSpeechService;
     private WikipediaService wikipediaService;
     private OpenAiService openAiService;
+    private ScrapingService scrapingService;
 
     @Autowired
     public void setPlacesService(PlacesService placesService) {
@@ -59,22 +62,25 @@ public class QuestionServiceImpl implements QuestionService {
         this.openAiService = openAiService;
     }
 
+    @Autowired
+    public void setScrapingService(ScrapingService scrapingService) {
+        this.scrapingService = scrapingService;
+    }
+
+    @Override
+    protected String serviceNameKey() {
+        return "question.service.name";
+    }
+
     @Override
     public QuestionResponse answerQuestion(QuestionRequest questionRequest) {
-        final List<PlaceDetails> placeDetails = new ArrayList<>();
-
-        questionRequest.placesId().stream().map(placesService::getPlaceDetails).map(PlaceDetailResponse::getResult)
-                .forEach(placeResult -> {
-                    final List<String> weekdayText = ListUtils.valueOrEmpty(placeResult.getOpeningHours(), OpeningHours::getWeekdayText);
-                    final String wikipediaText = getLocationDescription(placeResult);
-                    final PlaceDetails details = new PlaceDetails(placeResult.getName(), placeResult.getVicinity(),
-                        placeResult.getRating(), weekdayText, wikipediaText, placeResult.getTypes());
-                    placeDetails.add(details);
-                });
+        final List<PlaceDetails> placeDetails = cacheService.getCachedValueOrNew(getClass(),
+            "CACHE_KEY_PLACE_DETAILS", questionRequest.placesId(), this::getPlacesDetailsWithContext);
 
         final String question = getUserQuestion(questionRequest);
         final String prompt = MessageUtils.get("questions.locations.prompt", JsonUtils.toJsonString(placeDetails), question);
-        final String answered = openAiService.answerQuestion(prompt);
+//        final String answered = openAiService.answerQuestion(prompt);
+        final String answered = "madçlkjfçads";
 
         if (StringUtils.isNotBlank(answered)) {
             if (QuestionFormatType.TEXT.equals(questionRequest.formatType())) {
@@ -83,6 +89,21 @@ public class QuestionServiceImpl implements QuestionService {
             return new QuestionResponse(textToSpeechService.synthesizeText(answered).getAudioContent(), QuestionFormatType.AUDIO);
         }
         return new QuestionResponse("Não foi possível entender o audio enviado. Verifique a qualidade da gravação e tente novamente.", QuestionFormatType.TEXT);
+    }
+
+    private List<PlaceDetails> getPlacesDetailsWithContext(List<String> placesId){
+        final List<PlaceDetails> placeDetails = new ArrayList<>();
+
+        placesId.parallelStream().map(placesService::getPlaceDetails).map(PlaceDetailResponse::getResult)
+                .forEach(placeResult -> {
+                    final List<String> weekdayText = ListUtils.valueOrEmpty(placeResult.getOpeningHours(), OpeningHours::getWeekdayText);
+                    final String wikipediaText = getLocationDescription(placeResult);
+                    final PlaceDetails details = new PlaceDetails(placeResult.getName(), placeResult.getVicinity(),
+                            placeResult.getRating(), weekdayText, wikipediaText, placeResult.getTypes());
+                    placeDetails.add(details);
+                });
+
+        return placeDetails;
     }
 
     /**
@@ -98,7 +119,11 @@ public class QuestionServiceImpl implements QuestionService {
             return wikipediaText;
         }
 
-        final String nearestTitle = wikipediaService.getNearestWikipediaTitle(Arrays.asList(place.getName(), place.getCity()));
+        if(StringUtils.isNotEmpty(place.getWebsite())){
+            final List<String> text = scrapingService.scrapAllTextTags(place.getWebsite());
+        }
+
+        final String nearestTitle = wikipediaService.getNearestWikipediaTitle(new SearchByTitleAndCity(place.getName(), place.getCity()));
         if(StringUtils.isBlank(nearestTitle)){
             return MessageUtils.get("wikipedia.title.not.found", place.getName());
         }
@@ -116,5 +141,6 @@ public class QuestionServiceImpl implements QuestionService {
                 throw new IllegalArgumentException("Formato não suportado");
         }
     }
+
 
 }

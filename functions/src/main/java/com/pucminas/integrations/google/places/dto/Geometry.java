@@ -5,11 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Geometry {
+public class Geometry implements Serializable {
 
-    Location location;
+    @Serial
+    private static final long serialVersionUID = 4957306900807205496L;
+
+    private Location location;
 }

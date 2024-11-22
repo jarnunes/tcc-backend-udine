@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,18 +15,22 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Place {
-    String name;
+public class Place implements Serializable {
 
-    String vicinity;
+    @Serial
+    private static final long serialVersionUID = 1613117863226915039L;
+
+    private String name;
+
+    private String vicinity;
 
     @JsonProperty("place_id")
-    String placeId;
+    private String placeId;
 
-    List<String> types = new ArrayList<>();
+    private List<String> types = new ArrayList<>();
 
-    Geometry geometry;
+    private Geometry geometry;
 
     @JsonProperty("uri_icon")
-    String uriIcon;
+    private String uriIcon;
 }

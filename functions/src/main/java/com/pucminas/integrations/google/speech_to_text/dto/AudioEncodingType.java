@@ -1,6 +1,8 @@
 package com.pucminas.integrations.google.speech_to_text.dto;
 
-public enum AudioEncodingType {
+import java.io.Serializable;
+
+public enum AudioEncodingType implements Serializable {
 
     ENCODING_UNSPECIFIED,
     LINEAR16,
