@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/nearbyPlaces")
-public class NearbyPlacesRestController extends FunctionBase {
+public class NearbyPlacesRestController extends RestControllerBase {
 
     private PlacesService placesService;
 

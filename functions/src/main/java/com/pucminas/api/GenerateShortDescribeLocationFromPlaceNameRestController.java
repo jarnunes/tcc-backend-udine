@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/generateShortDescribeLocationFromPlaceName")
-public class GenerateShortDescribeLocationFromPlaceNameRestController extends FunctionBase {
+public class GenerateShortDescribeLocationFromPlaceNameRestController extends RestControllerBase {
 
     private OpenAiService openAiService;
 

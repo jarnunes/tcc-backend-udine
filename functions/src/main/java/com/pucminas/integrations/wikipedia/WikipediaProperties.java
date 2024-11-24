@@ -24,4 +24,7 @@ public class WikipediaProperties {
 
     @Value("${udine.wikipedia.explaintext}")
     private String explaintext;
+
+    @Value("${udine.wikipedia.text-length}")
+    private Integer textLength;
 }

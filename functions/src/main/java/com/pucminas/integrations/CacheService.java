@@ -1,6 +1,7 @@
 package com.pucminas.integrations;
 
 import com.pucminas.commons.resource.FileResource;
+import com.pucminas.commons.utils.StrUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.Serial;
@@ -16,10 +19,12 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 @Component
 @CommonsLog
+@EnableScheduling
 public class CacheService {
     private static final String CACHE_FILE = "cache.ser";
     private Map<String, Cache> globalCache ;
@@ -31,6 +36,28 @@ public class CacheService {
 
     @PreDestroy
     public void destroy() {
+        saveCache();
+    }
+
+    @Scheduled(fixedRate = 3600000)
+    private void clearCacheScheduled() {
+        log.info("Clearing cache scheduled");
+
+        final AtomicBoolean hasRemovedAnyKey = new AtomicBoolean(false);
+        globalCache.forEach((key, value) -> {
+            if (value.getExpiration().isBefore(LocalDateTime.now())) {
+                globalCache.remove(key);
+                hasRemovedAnyKey.set(true);
+            }
+        });
+
+        if (hasRemovedAnyKey.get()) {
+            saveCache();
+        }
+    }
+
+    public void clearAllCache() {
+        globalCache.clear();
         saveCache();
     }
 
@@ -51,7 +78,8 @@ public class CacheService {
     }
 
     private String getCacheKey(Class<?> clazz, String key, Object params) {
-        return clazz.getCanonicalName() + "|" + "|" + key + ( params == null ? "null" : params.toString());
+        final String paramsKey = params == null ? "null" : params.toString();
+        return StrUtils.joinObjects("|", clazz.getCanonicalName(), key,  paramsKey);
     }
 
     private void saveCache() {

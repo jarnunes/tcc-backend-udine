@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/searchWikipediaByTitle")
-public class SearchWikipediaByTitleRestController extends FunctionBase {
+public class SearchWikipediaByTitleRestController extends RestControllerBase {
 
     private final WikipediaService service;
 

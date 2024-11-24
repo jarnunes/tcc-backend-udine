@@ -33,7 +33,7 @@ public class WikipediaServiceImpl extends ServiceBase implements WikipediaServic
     @Override
     public String getWikipediaText(String title) {
         return cacheService.getCachedValueOrNew(getClass(), "CACHE_KEY_GET_WIKIPEDIA_TITLE", title,
-                this::searchOnWikipediaByTitle);
+            this::searchOnWikipediaByTitle);
     }
 
     private String searchOnWikipediaByTitle(String title) {
@@ -53,14 +53,14 @@ public class WikipediaServiceImpl extends ServiceBase implements WikipediaServic
                 .map(query -> query.pages().values().iterator().next())
                 .map(page -> MessageUtils.defaultIfEmpty(page.extract(), "wikipedia.title.not.found", title))
                 .map(StrUtils::removeMarkdownFormatting)
-                .mapNotNull(text -> StringUtils.truncate(text, 1000))
+                .mapNotNull(text -> StringUtils.truncate(text, properties.getTextLength()))
                 .block());
     }
 
     @Override
     public String getNearestWikipediaTitle(SearchByTitleAndCity filter) {
         return cacheService.getCachedValueOrNew(getClass(), "CACHE_KEY_NEAREST_WIKIPEDIA_TITLE", filter,
-                this::searchNearestOnWikipedia);
+            this::searchNearestOnWikipedia);
     }
 
     private String searchNearestOnWikipedia(SearchByTitleAndCity searchFilter) {

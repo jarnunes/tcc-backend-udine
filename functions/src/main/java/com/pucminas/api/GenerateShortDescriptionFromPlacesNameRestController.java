@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/generateShortDescriptionFromPlacesName")
-public class GenerateShortDescriptionFromPlacesNameRestController extends FunctionBase {
+public class GenerateShortDescriptionFromPlacesNameRestController extends RestControllerBase {
 
     private OpenAiService openAiService;
 

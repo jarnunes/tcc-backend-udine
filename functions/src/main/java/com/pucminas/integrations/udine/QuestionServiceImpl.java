@@ -79,8 +79,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
         final String question = getUserQuestion(questionRequest);
         final String prompt = MessageUtils.get("questions.locations.prompt", JsonUtils.toJsonString(placeDetails), question);
-//        final String answered = openAiService.answerQuestion(prompt);
-        final String answered = "madçlkjfçads";
+        final String answered = openAiService.answerQuestion(prompt);
 
         if (StringUtils.isNotBlank(answered)) {
             if (QuestionFormatType.TEXT.equals(questionRequest.formatType())) {
@@ -119,9 +118,10 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
             return wikipediaText;
         }
 
-        if(StringUtils.isNotEmpty(place.getWebsite())){
-            final List<String> text = scrapingService.scrapAllTextTags(place.getWebsite());
-        }
+        // Não usar scraping por enquanto
+        //        if(StringUtils.isNotEmpty(place.getWebsite())){
+        //            final List<String> text = scrapingService.scrapAllTextTags(place.getWebsite());
+        //        }
 
         final String nearestTitle = wikipediaService.getNearestWikipediaTitle(new SearchByTitleAndCity(place.getName(), place.getCity()));
         if(StringUtils.isBlank(nearestTitle)){

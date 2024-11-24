@@ -6,7 +6,7 @@ import lombok.extern.apachecommons.CommonsLog;
 import java.util.function.Function;
 
 @CommonsLog
-public abstract class FunctionBase {
+public abstract class RestControllerBase {
 
     protected abstract String serviceName();
 

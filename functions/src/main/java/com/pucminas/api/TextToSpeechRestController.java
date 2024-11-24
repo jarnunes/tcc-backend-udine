@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/textToSpeech")
-public class TextToSpeechRestController extends FunctionBase {
+public class TextToSpeechRestController extends RestControllerBase {
 
     private TextToSpeechService service;
 

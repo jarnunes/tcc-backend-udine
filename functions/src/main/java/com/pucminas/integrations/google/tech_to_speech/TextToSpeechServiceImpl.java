@@ -27,7 +27,7 @@ public class TextToSpeechServiceImpl extends ServiceBase implements TextToSpeech
     @Override
     public TextToSpeechResponse synthesizeText(String text) {
         return cacheService.getCachedValueOrNew(getClass(), "CACHE_KEY_SYNTHESIZE_TEXT", text,
-                this::synthesize);
+            this::synthesize);
     }
 
     public TextToSpeechResponse synthesize(String text) {

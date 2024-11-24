@@ -20,14 +20,6 @@ logging:
       max-file-size: 10MB
 
 udine:
-  vertex:
-    gemini:
-      url: ${VERTEX_GEMINI_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent}
-      api-key: ${VERTEX_GEMINI_API_KEY:EMPTY}
-      connections-attempt: ${VERTEX_GEMINI_CONNECTIONS_ATTEMPT:3}
-      name:
-        param:
-          apiKey: ${VERTEX_GEMINI_NAME_PARAM_API_KEY:key}
   google:
     places:
       url: ${GOOGLE_PLACES_URL:https://maps.googleapis.com/maps/api/place}
@@ -55,6 +47,8 @@ udine:
     url: ${OPEN_AI_URL:https://api.openai.com}
     path: ${OPEN_AI_PATH:/v1/chat/completions}
     api-key: ${OPEN_AI_API_KEY}
+    create-fake-text: ${OPEN_AI_CREATE_FAKE_TEXT:false}
+    fake-text: ${OPEN_AI_FAKE_TEXT:Olá, sou o UdineTour. Este é um texto gerado automaticamente para reduzir o custo da integração com a OpenAI}
 
   wikipedia:
     url: ${WIKIPEDIA_URL:https://pt.wikipedia.org/w/api.php}
@@ -62,3 +56,4 @@ udine:
     format: ${WIKIPEDIA_FORMAT:json}
     prop: ${WIKIPEDIA_PROP:extracts}
     explaintext: ${WIKIPEDIA_EXPLAINTEXT:""}
+    text-length:  ${WIKIPEDIA_TEXT_LENGTH:400}

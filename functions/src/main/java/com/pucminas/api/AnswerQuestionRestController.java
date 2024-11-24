@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/answerQuestion")
-public class AnswerQuestionRestController extends FunctionBase {
+public class AnswerQuestionRestController extends RestControllerBase {
 
     private QuestionServiceImpl questionService;
 

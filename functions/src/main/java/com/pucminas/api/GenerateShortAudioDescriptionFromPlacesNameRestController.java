@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/generateShortAudioDescriptionFromPlacesName")
-public class GenerateShortAudioDescriptionFromPlacesNameRestController extends FunctionBase {
+public class GenerateShortAudioDescriptionFromPlacesNameRestController extends RestControllerBase {
 
     private TextToSpeechService textToSpeechService;
     private OpenAiService openAiService;

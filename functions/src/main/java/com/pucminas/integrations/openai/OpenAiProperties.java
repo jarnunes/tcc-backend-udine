@@ -18,4 +18,10 @@ public class OpenAiProperties {
 
     @Value("${udine.openai.api-key}")
     private String apiKey;
+
+    @Value("${udine.openai.create-fake-text}")
+    private boolean createFakeText  = false;
+
+    @Value("${udine.openai.fake-text}")
+    private String fakeText;
 }

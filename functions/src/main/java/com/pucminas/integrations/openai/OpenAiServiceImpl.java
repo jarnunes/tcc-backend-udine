@@ -37,6 +37,9 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
     @Override
     public String processPrompt(String prompt) {
         final OpenAiRequest request = new OpenAiRequest(prompt);
+        if (properties.isCreateFakeText()) {
+            return properties.getFakeText();
+        }
 
         return processWithAttempts(3, request,  () ->
                 WebClient.builder().baseUrl(properties.getUrl())

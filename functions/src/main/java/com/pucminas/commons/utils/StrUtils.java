@@ -14,8 +14,12 @@ public class StrUtils {
         return String.join(", ", values);
     }
 
+    public static String joinObjects(final String delimiter, Object... values) {
+        return String.join(delimiter, Stream.of(values).map(Object::toString).toList());
+    }
+
     public static String joinObjects(Object... values) {
-        return String.join(", ", Stream.of(values).map(Object::toString).toList());
+        return joinObjects(", ", values);
     }
 
     public static String removeMarkdownFormatting(String value) {
