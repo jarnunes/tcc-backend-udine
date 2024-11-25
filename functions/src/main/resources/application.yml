@@ -22,13 +22,20 @@ logging:
 udine:
   google:
     places:
-      url: ${GOOGLE_PLACES_URL:https://maps.googleapis.com/maps/api/place}
-      nearby-search-path: ${GOOGLE_PLACES_NEARBY_SEARCH_PATH:/nearbysearch/json}
+      url: ${GOOGLE_PLACES_URL:https://places.googleapis.com/v1/places}
+      nearby-search-path: ${GOOGLE_PLACES_NEARBY_SEARCH_PATH::searchNearby}
       details-path: ${GOOGLE_PLACES_DETAILS_PATH:/details/json}
       apiKey: ${GOOGLE_PLACES_API_KEY}
+      radius: ${GOOGLE_PLACES_RADIUS:2000}
+      max-results: ${GOOGLE_PLACES_MAX_RESULTS:50}
+      default-types:
+        - tourist_attraction
       types:
         - tourist_attraction
-        - park
+        - restaurant
+        - lodging
+
+
   geocode:
     url: ${GEOCODE_URL:https://maps.googleapis.com/maps/api/geocode/json}
     api-key: ${GEOCODE_API_KEY}

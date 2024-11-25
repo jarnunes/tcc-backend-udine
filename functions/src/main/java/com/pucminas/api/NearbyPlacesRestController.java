@@ -22,7 +22,7 @@ public class NearbyPlacesRestController extends RestControllerBase {
     }
 
     @PostMapping
-    public ResponseEntity<PlacesResponse> apply(@RequestBody PlacesRequest request) {
+    public ResponseEntity<PlacesResponse> getNearbyPlaces(@RequestBody PlacesRequest request) {
         return ResponseEntity.ok(super.processRequest(request, placesService::getNearbyPlaces));
     }
 

@@ -4,6 +4,8 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,10 +17,8 @@ public class PlacesRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -472297264770491541L;
-
-    Double latitude;
-    Double longitude;
-    Integer radius;
-    String type = "tourist_attraction";
+    private PlaceRequestRestriction locationRestriction;
+    private Integer maxResultCount;
+    private List<String> includedTypes = new ArrayList<>();
 
 }

@@ -1,6 +1,5 @@
 package com.pucminas.integrations.google.places;
 
-import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.geocode.GeocodeService;
 import com.pucminas.integrations.google.places.dto.Location;
@@ -14,6 +13,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @CommonsLog
@@ -38,25 +39,62 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
 
     @Override
     public PlacesResponse getNearbyPlaces(PlacesRequest request) {
+        request.setIncludedTypes(properties.getTypes());
+
         return cacheService.getCachedValueOrNew(getClass(), "KEY_PLACES_SERVICE_NEARBY_PLACES", request,
             this::getNearbyPlacesLocation);
     }
 
+    @Override
+    public PlacesResponse getNearbyPlaces(PlacesRequest request, List<String> types) {
+        request.setIncludedTypes(types);
+        return getNearbyPlacesLocation(request);
+    }
+
     private PlacesResponse getNearbyPlacesLocation(PlacesRequest request) {
-        return processWithAttempts(3, request, () -> WebClient.builder()
-                .baseUrl(properties.getUrl())
-                .build().get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(properties.getNearbySearchPath())
-                        .queryParam("location", StrUtils.joinObjects(request.getLatitude(), request.getLongitude()))
-                        .queryParam("radius", request.getRadius())
-                        .queryParam("type", request.getType())
-                        .queryParam("key", properties.getGooglePlacesApiKey())
-                        .build())
-                .header("Accept-Language", "pt")
-                .retrieve()
-                .bodyToMono(PlacesResponse.class)
-                .block());
+        final PlacesResponse response = new PlacesResponse();
+        final AtomicReference<String> nextPageToken = new AtomicReference<>();
+
+        processWithAttempts(3, request, () -> {
+            do {
+                final PlacesResponse currentPageResponse = getBuilder()
+                        .baseUrl(properties.getUrl())
+                        .build().post()
+                        .uri(uriBuilder -> uriBuilder
+                                .path(properties.getNearbySearchPath())
+                                .queryParamIfPresent("pagetoken", Optional.ofNullable(nextPageToken.get()))
+                                .build())
+                        .header("Accept-Language", "pt")
+                        .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
+                        .header("X-Goog-FieldMask","*")
+                        .bodyValue(request)
+                        .retrieve()
+                        .bodyToMono(PlacesResponse.class)
+                        .block();
+
+                if (currentPageResponse != null && response.getPlaces() != null) {
+                    response.getPlaces().addAll(currentPageResponse.getPlaces());
+                    nextPageToken.set(currentPageResponse.getNextPageToken());
+                    waitValidToken(currentPageResponse.getNextPageToken());
+                } else {
+                    nextPageToken.set(null);
+                }
+            } while (response.getPlaces().size() < properties.getMaxResults() && nextPageToken.get() != null);
+
+            return null;
+        });
+
+        return response;
+    }
+
+    private void waitValidToken(String token) {
+        if (token != null) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override
@@ -82,7 +120,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
 
             if (response != null) {
                 final Location location = response.getResult().getGeometry().getLocation();
-                final String city = geocodeService.getCityName(location.getLat(), location.getLng());
+                final String city = geocodeService.getCityName(location.getLatitude(), location.getLongitude());
                 response.getResult().setCity(city);
             }
             return response;

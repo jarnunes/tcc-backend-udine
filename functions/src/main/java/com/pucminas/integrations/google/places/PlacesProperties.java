@@ -25,6 +25,15 @@ public class PlacesProperties {
     @Value("${udine.google.places.apiKey}")
     private String googlePlacesApiKey;
 
+    private List<String> defaulttypes = new ArrayList<>();
+
     private List<String> types = new ArrayList<>();
+
+    @Value("${udine.google.places.radius}")
+    private Double radius;
+
+    @Value("${udine.google.places.max-results}")
+    private Integer maxResults;
+
 
 }

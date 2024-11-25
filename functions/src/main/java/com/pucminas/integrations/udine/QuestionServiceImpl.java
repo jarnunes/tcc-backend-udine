@@ -4,6 +4,7 @@ import com.pucminas.commons.utils.JsonUtils;
 import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.commons.utils.MessageUtils;
 import com.pucminas.integrations.ServiceBase;
+import com.pucminas.integrations.google.places.PlacesProperties;
 import com.pucminas.integrations.google.places.PlacesService;
 import com.pucminas.integrations.google.places.dto.OpeningHours;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
@@ -36,6 +37,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
     private WikipediaService wikipediaService;
     private OpenAiService openAiService;
     private ScrapingService scrapingService;
+    private PlacesProperties placesProperties;
 
     @Autowired
     public void setPlacesService(PlacesService placesService) {
@@ -67,6 +69,11 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         this.scrapingService = scrapingService;
     }
 
+    @Autowired
+    public void setPlacesProperties(PlacesProperties placesProperties) {
+        this.placesProperties = placesProperties;
+    }
+
     @Override
     protected String serviceNameKey() {
         return "question.service.name";
@@ -74,6 +81,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
     @Override
     public QuestionResponse answerQuestion(QuestionRequest questionRequest) {
+        final List<String> placesTypes = getPlacesTypesBasedOnQuestion(questionRequest.question());
         final List<PlaceDetails> placeDetails = cacheService.getCachedValueOrNew(getClass(),
             "CACHE_KEY_PLACE_DETAILS", questionRequest.placesId(), this::getPlacesDetailsWithContext);
 
@@ -93,6 +101,19 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
             return new QuestionResponse(textToSpeechService.synthesizeText(answered).getAudioContent(), QuestionFormatType.AUDIO);
         }
         return new QuestionResponse("Não foi possível entender o audio enviado. Verifique a qualidade da gravação e tente novamente.", QuestionFormatType.TEXT);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getPlacesTypesBasedOnQuestion(String question) {
+        final String prompt = MessageUtils.get("questions.identify.locations.type.based.on.question",
+            JsonUtils.toJsonString(placesProperties.getTypes()), question);
+        final String response = openAiService.answerQuestion(prompt);
+        try {
+            return JsonUtils.toObject(response, ArrayList.class);
+        } catch (Exception e) {
+            log.error(MessageUtils.get("questions.error.converts.openai.response.to.list"), e);
+            return placesProperties.getTypes();
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -5,6 +5,7 @@ import com.pucminas.commons.utils.JsonUtils;
 import com.pucminas.commons.utils.MessageUtils;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.ConnectException;
 import java.net.UnknownHostException;
@@ -55,6 +56,13 @@ public abstract class ServiceBase {
 
     private boolean isConnectException(Throwable e){
         return e instanceof ConnectException || e instanceof UnknownHostException;
+    }
+
+    protected WebClient.Builder getBuilder() {
+        return WebClient.builder()
+                .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024));
     }
 
 }

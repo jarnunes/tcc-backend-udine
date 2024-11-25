@@ -12,11 +12,11 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Location implements Serializable {
+public class PlaceText implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -3558468037386032571L;
+    private static final long serialVersionUID = -8796103147571682891L;
 
-    Double latitude;
-    Double longitude;
+    String text;
+    String languageCode;
 }
