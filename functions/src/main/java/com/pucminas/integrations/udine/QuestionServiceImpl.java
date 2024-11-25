@@ -78,6 +78,9 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
             "CACHE_KEY_PLACE_DETAILS", questionRequest.placesId(), this::getPlacesDetailsWithContext);
 
         removeLocationsNotRelatedToQuestion(placeDetails, questionRequest.question());
+        if(CollectionUtils.isEmpty(placeDetails)) {
+            return new QuestionResponse(MessageUtils.get("questions.nearby.location.not.found"), QuestionFormatType.TEXT);
+        }
 
         final String question = getUserQuestion(questionRequest);
         final String prompt = MessageUtils.get("questions.locations.prompt", JsonUtils.toJsonString(placeDetails), question);
@@ -99,11 +102,9 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         final String response = openAiService.answerQuestion(promptFilterLocations);
         try {
             List<String> locationsNames = JsonUtils.toObject(response, ArrayList.class);
-            if (CollectionUtils.isNotEmpty(locationsNames)) {
-                placesDetails.removeIf(it -> !locationsNames.contains(it.name()));
-            }
+            placesDetails.removeIf(it -> !locationsNames.contains(it.name()));
         } catch (Exception e) {
-            log.error("Erro ao converter resposta do openai para lista de strings", e);
+            log.error(MessageUtils.get("questions.error.converts.openai.response.to.list"), e);
         }
     }
 

@@ -36,7 +36,12 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
 
     @Override
     public String processPrompt(String prompt) {
-        final OpenAiRequest request = new OpenAiRequest(prompt);
+        final OpenAiRequest request = new OpenAiRequest();
+        request.setModel(properties.getModel());
+        request.setMaxTokens(properties.getMaxTokens());
+        request.setTemperature(properties.getTemperature());
+        request.addPrompt(prompt);
+
         if (properties.isCreateFakeText()) {
             return properties.getFakeText();
         }

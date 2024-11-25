@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OpenAiRequest {
-    private String model = "gpt-4";
+    private String model = "gpt-4o-mini";
 
     private List<MessageRequest> messages = new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class OpenAiRequest {
     private int maxTokens = 150;
     private double temperature = 0.7;
 
-    public OpenAiRequest(String prompt) {
+    public void addPrompt(String prompt) {
         this.messages.add(new MessageRequest(prompt));
     }
 }
