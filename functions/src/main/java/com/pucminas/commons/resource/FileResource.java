@@ -42,7 +42,7 @@ public class FileResource implements Resource {
 
     public void writerImage(String fileName, byte[] photo) {
         final String filePathName = createResourceImagePathName( fileName);
-        createApplicationResourcePath();
+        createImagePath();
 
         try{
             Path outputPath = Paths.get(filePathName);
@@ -65,7 +65,7 @@ public class FileResource implements Resource {
     }
 
     public void removeImage(String fileName) {
-        final String filePathName = createResourcePathName("images", fileName);
+        final String filePathName = createResourceImagePathName(fileName);
         final Path imagePath = Paths.get(filePathName);
 
         try {
@@ -77,7 +77,7 @@ public class FileResource implements Resource {
 
     public void writer(String fileName, Object object) {
         final String filePathName = createResourcePathName(fileName);
-        createImagePath();
+        createApplicationResourcePath();
         writeObject(filePathName, object);
     }
 

@@ -18,5 +18,6 @@ public class PlacePhoto implements Serializable {
     private static final long serialVersionUID = 2945617133966090962L;
 
     private String name;
+    private byte[] content;
 
 }

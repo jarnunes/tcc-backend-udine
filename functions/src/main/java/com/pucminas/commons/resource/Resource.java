@@ -16,12 +16,13 @@ public interface Resource {
     }
 
     default String createResourceImagePathName(String fileName){
-        return createResourcePathName("images");
+        return createResourcePathName("images", fileName);
     }
 
     default void createApplicationResourcePath() {
         createPath();
     }
+
     default void createImagePath() {
         createPath("images");
     }

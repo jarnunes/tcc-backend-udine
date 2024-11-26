@@ -1,9 +1,6 @@
 package com.pucminas.integrations.google.places;
 
-import com.pucminas.integrations.google.places.dto.Place;
-import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
-import com.pucminas.integrations.google.places.dto.PlacesRequest;
-import com.pucminas.integrations.google.places.dto.PlacesResponse;
+import com.pucminas.integrations.google.places.dto.*;
 
 import java.util.List;
 
@@ -18,7 +15,7 @@ public interface PlacesService {
 
     List<Place> getPlacesDetails(List<String> placesId);
 
-    byte[] getPlacePhoto(String photoReference);
+    PlacePhoto getPlacePhoto(String photoReference);
 
-    List<byte[]> getPlacePhotos(List<String> photoReferences);
+    List<PlacePhoto> getPlacePhotos(List<String> photoReferences);
 }

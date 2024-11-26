@@ -1,5 +1,6 @@
 package com.pucminas.integrations.udine.vo;
 
+import com.pucminas.integrations.google.places.dto.PlacePhoto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class QuestionResponse implements Serializable {
 
     private String response;
     private QuestionFormatType formatType;
-    private List<byte[]> placePhotos = new ArrayList<>();
+    private List<PlacePhoto> placePhotos = new ArrayList<>();
     private Boolean success = true;
 
 }

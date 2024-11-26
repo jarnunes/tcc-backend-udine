@@ -7,12 +7,8 @@ import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,7 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class PlacesServiceImpl extends ServiceBase implements PlacesService {
     private static final String KEY_PLACES_SERVICE_PLACE_NEARBY = "KEY_PLACES_SERVICE_PLACE_NEARBY";
     private static final String KEY_PLACES_SERVICE_PLACE_DETAILS = "KEY_PLACES_SERVICE_PLACES_DETAILS";
-    private static final String KEY_PLACES_SERVICE_PLACE_PHOTOS = "KEY_PLACES_SERVICE_PLACE_PHOTOS";
 
     private PlacesProperties properties;
     private GeocodeService geocodeService;
@@ -130,13 +125,15 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
     }
 
     @Override
-    public byte[] getPlacePhoto(String photoReference) {
+    public PlacePhoto getPlacePhoto(String photoReference) {
         final String[] photoReferenceParts = photoReference.split("/");
         final String photoReferenceId = photoReferenceParts[photoReferenceParts.length - 1];
         final String placeId = photoReferenceParts[photoReferenceParts.length - 3];
         final String fileName = placeId + "_-_" + photoReferenceId + ".jpg";
 
-        return cacheService.getImageFile(fileName, () ->
+
+
+        byte[] content = cacheService.getImageFile(fileName, () ->
                 processWithAttempts(3, photoReference, () -> {
                     final byte[] photo = getBuilder()
                             .clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
@@ -157,10 +154,15 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
                     return photo;
                 }));
 
+        final PlacePhoto placePhoto = new PlacePhoto();
+        placePhoto.setName(fileName);
+        placePhoto.setContent(content);
+        return placePhoto;
+
     }
 
     @Override
-    public List<byte[]> getPlacePhotos(List<String> photoReferences) {
+    public List<PlacePhoto> getPlacePhotos(List<String> photoReferences) {
         return photoReferences.parallelStream().map(this::getPlacePhoto).toList();
     }
 
