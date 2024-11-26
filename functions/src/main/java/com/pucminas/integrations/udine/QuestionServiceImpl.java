@@ -73,6 +73,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         response.setResponse("questions.not.possible.understand.audio");
 
         final List<Place> places = placesService.getPlacesDetails(questionRequest.placesId());
+        final List<PlacePhoto> placePhotos = new ArrayList<>();
         final String question = getUserQuestion(questionRequest);
         final List<PlaceDetails> placeDetails = getPlacesDetailsWithContext(places);
         final boolean isAudioQuestion = QuestionFormatType.AUDIO.equals(questionRequest.formatType());
@@ -80,9 +81,11 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         removeLocationsNoRelatedToQuestion(placeDetails, question);
 
         if(CollectionUtils.isEmpty(placeDetails)) {
-            response.setResponse(MessageUtils.get("questions.nearby.location.not.found"));
-            response.setFormatType(QuestionFormatType.TEXT);
-            return response;
+            return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
+                    .response(MessageUtils.get("questions.nearby.location.not.found"))
+                    .placePhotos(placePhotos)
+                    .success(false)
+                    .build();
         }
 
         final String promptKey = isAudioQuestion ? "questions.locations.prompt.audio" : "questions.locations.prompt.text";
@@ -93,34 +96,33 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         try{
             final QuestionLlmAnswer llmAnswer = JsonUtils.toObject(answered, QuestionLlmAnswer.class);
             if (llmAnswer == null) {
-                return response;
+                return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
+                        .response("Ocorreu um erro no servidor. Tente novamente em alguns minutos")
+                        .placePhotos(placePhotos)
+                        .success(false)
+                        .build();
             }
 
             if (llmAnswer.getIdLocation() != null) {
                 places.stream().filter(it -> it.getId().equals(llmAnswer.getIdLocation()))
                     .map(Place::getPhotos).flatMap(Collection::stream).map(PlacePhoto::getName)
                     .map(placesService::getPlacePhoto)
-                    .forEach(photo -> response.getPlacePhotos().add(photo));
+                    .forEach(placePhotos::add);
             }
 
             if (StringUtils.isNotBlank(llmAnswer.getAnswer())) {
-                if (!isAudioQuestion) {
-                    response.setFormatType(QuestionFormatType.TEXT);
-                    response.setResponse(llmAnswer.getAnswer());
-                    return response;
-                }
-
-                final String answeredNormalized = StrUtils.removeMarkdownFormatting(llmAnswer.getAnswer());
-                response.setResponse(textToSpeechService.synthesizeText(answeredNormalized).getAudioContent());
-                response.setFormatType(QuestionFormatType.AUDIO);
-                return response;
+                return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
+                        .response(llmAnswer.getAnswer())
+                        .placePhotos(placePhotos)
+                        .build();
             }
         } catch (Exception e) {
-            log.error("Error parsing answer from llm", e);
-            response.setFormatType(QuestionFormatType.TEXT);
-            response.setResponse("Error parsing answer from llm");
-            response.setSuccess(false);
-            return response;
+            log.error("Erro ao processar resposta obtida do LLM", e);
+            return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
+                    .response("Ocorreu um erro no servidor. Tente novamente em alguns minutos")
+                    .placePhotos(placePhotos)
+                    .success(false)
+                    .build();
         }
 
         return response;

@@ -30,6 +30,11 @@ public class TextToSpeechServiceImpl extends ServiceBase implements TextToSpeech
             this::synthesize);
     }
 
+    @Override
+    public String synthesizeTextString(String text) {
+        return synthesizeText(text).getAudioContent();
+    }
+
     public TextToSpeechResponse synthesize(String text) {
         return processWithAttempts(3, text, () -> {
             final TextToSpeechRequest request = TextToSpeechRequest.builder().withInput(text).build();

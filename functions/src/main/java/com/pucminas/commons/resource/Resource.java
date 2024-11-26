@@ -24,6 +24,7 @@ public interface Resource {
     }
 
     default void createImagePath() {
+        createApplicationResourcePath();
         createPath("images");
     }
 
