@@ -78,9 +78,13 @@ public class WikipediaServiceImpl extends ServiceBase implements WikipediaServic
                                 .build())
                         .retrieve()
                         .bodyToMono(WikipediaQueryLikeResponse.class)
-                        .map(WikipediaQueryLikeResponse::query)
-                        .map(QueryLikeResponse::search)
+                        .mapNotNull(WikipediaQueryLikeResponse::query)
+                        .mapNotNull(QueryLikeResponse::search)
                         .block());
+
+        if (searchResults == null || searchResults.isEmpty()) {
+            return null;
+        }
 
         final List<String> suggestedTitles = searchResults.stream().map(SearchLike::title).toList();
         return TextMatcherUtils.findBestMatch(titles, searchFilter.city(), suggestedTitles);

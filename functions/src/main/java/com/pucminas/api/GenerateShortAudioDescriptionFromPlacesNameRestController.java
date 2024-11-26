@@ -30,7 +30,7 @@ public class GenerateShortAudioDescriptionFromPlacesNameRestController extends R
     }
 
     @PostMapping
-    public ResponseEntity<TextToSpeechResponse> apply(@RequestBody List<String> placesNames) {
+    public ResponseEntity<TextToSpeechResponse> generateShortDescription(@RequestBody List<String> placesNames) {
         final String description = super.processRequest(placesNames, openAiService::generateShortDescription);
         final TextToSpeechResponse response = super.processRequest(description, textToSpeechService::synthesizeText);
         return ResponseEntity.ok(response);

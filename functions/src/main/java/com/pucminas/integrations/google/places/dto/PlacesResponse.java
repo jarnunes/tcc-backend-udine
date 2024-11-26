@@ -34,4 +34,8 @@ public class PlacesResponse implements Serializable {
         }
         return places;
     }
+
+    public void addPlaces(List<Place> places) {
+        getPlaces().addAll(places);
+    }
 }

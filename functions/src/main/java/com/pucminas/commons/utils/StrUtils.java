@@ -3,6 +3,7 @@ package com.pucminas.commons.utils;
 import com.ibm.icu.text.Transliterator;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class StrUtils {
@@ -15,7 +16,7 @@ public class StrUtils {
     }
 
     public static String joinObjects(final String delimiter, Object... values) {
-        return String.join(delimiter, Stream.of(values).map(Object::toString).toList());
+        return String.join(delimiter, Stream.of(values).filter(Objects::nonNull).map(String::valueOf).toList());
     }
 
     public static String joinObjects(Object... values) {
@@ -28,6 +29,7 @@ public class StrUtils {
                 .trim();
     }
 
+
     public static String removeNonTextNumbers(String value) {
         return value.replaceAll("[^\\p{L}\\p{N}\\s]", "");
     }
@@ -35,6 +37,10 @@ public class StrUtils {
     public static String normalizeAccents(String value){
         Transliterator transliterator = Transliterator.getInstance("NFD; [:Nonspacing Mark:] Remove; NFC");
         return transliterator.transliterate(value);
+    }
+
+    public static String removeDoubleQuotes(String value) {
+        return value.replaceAll("\"", "");
     }
 
 }

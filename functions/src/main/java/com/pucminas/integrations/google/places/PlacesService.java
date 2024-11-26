@@ -1,5 +1,6 @@
 package com.pucminas.integrations.google.places;
 
+import com.pucminas.integrations.google.places.dto.Place;
 import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
 import com.pucminas.integrations.google.places.dto.PlacesRequest;
 import com.pucminas.integrations.google.places.dto.PlacesResponse;
@@ -15,7 +16,7 @@ public interface PlacesService {
     PlacesResponse getNearbyPlaces(PlacesRequest request, List<String> types);
 
     // https://developers.google.com/maps/documentation/places/web-service/details?hl=pt-br
-    PlaceDetailResponse getPlaceDetails(String placeId);
+    Place getPlaceDetails(String placeId);
 
-    List<PlaceDetailResponse> getPlacesDetails(List<String> placesId);
+    List<Place> getPlacesDetails(List<String> placesId);
 }

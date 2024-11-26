@@ -22,6 +22,7 @@ public class Place implements Serializable {
     private static final long serialVersionUID = 1613117863226915039L;
 
     private String id;
+    private List<String> types = new ArrayList<>();
     private String nationalPhoneNumber;
     private String shortFormattedAddress;
     private Location location;
@@ -31,8 +32,10 @@ public class Place implements Serializable {
     private Integer userRatingCount;
     private String iconMaskBaseUri;
     private PlaceText displayName;
-    private List<String> weekdayDescriptions = new ArrayList<>();
     private PlaceText editorialSummary;
-    private List<String> types = new ArrayList<>();
+    private List<String> weekdayDescriptions = new ArrayList<>();
+    private OpeningHours currentOpeningHours;
+    private List<Review> reviews = new ArrayList<>();
+    private String city;
 
 }

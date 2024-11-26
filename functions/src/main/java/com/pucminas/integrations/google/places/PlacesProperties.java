@@ -19,9 +19,6 @@ public class PlacesProperties {
     @Value("${udine.google.places.nearby-search-path}")
     private String nearbySearchPath;
 
-    @Value("${udine.google.places.details-path}")
-    private String detailsPath;
-
     @Value("${udine.google.places.apiKey}")
     private String googlePlacesApiKey;
 

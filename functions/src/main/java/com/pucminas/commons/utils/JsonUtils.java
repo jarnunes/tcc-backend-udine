@@ -32,7 +32,6 @@ public class JsonUtils {
     private static ObjectMapper getObjectMapperInstance() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
     }
 

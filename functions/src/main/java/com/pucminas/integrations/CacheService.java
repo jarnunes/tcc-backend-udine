@@ -39,7 +39,7 @@ public class CacheService {
         saveCache();
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 3600000, initialDelay = 3600000)
     private void clearCacheScheduled() {
         log.info("Clearing cache scheduled");
 
@@ -61,6 +61,11 @@ public class CacheService {
         saveCache();
     }
 
+    public <T> void putCache(Class<?> ownerType, String key, T params, Object value) {
+        final String cacheKey = getCacheKey(ownerType, key, params);
+        putCache(cacheKey, value);
+    }
+
     @SuppressWarnings("unchecked")
     public <T, R> R getCachedValueOrNew(Class<?> ownerType, String key, T params, Function<T, R> getValue) {
         final String cacheKey = getCacheKey(ownerType, key, params);
@@ -73,9 +78,15 @@ public class CacheService {
             }
         }
         final R value = getValue.apply(params);
-        globalCache.put(cacheKey, new Cache(value, LocalDateTime.now().plusDays(20)));
+        putCache(cacheKey, value);
+
         return value;
     }
+
+    public void putCache(String key, Object value) {
+        globalCache.put(key, new Cache(value, LocalDateTime.now().plusDays(20)));
+    }
+
 
     private String getCacheKey(Class<?> clazz, String key, Object params) {
         final String paramsKey = params == null ? "null" : params.toString();

@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -24,9 +25,12 @@ public class PlaceDetailResult  implements Serializable {
     private String vicinity;
     private String url;
     private String website;
-    @JsonProperty("opening_hours")
-    private OpeningHours openingHours;
+
     private List<String> types;
     private Geometry geometry;
+
     private String city;
+
+    private List<String> weekdayDescriptions = new ArrayList<>();
+    private List<Review> reviews = new ArrayList<>();
 }

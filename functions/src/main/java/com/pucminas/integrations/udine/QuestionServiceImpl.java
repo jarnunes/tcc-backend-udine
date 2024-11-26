@@ -3,12 +3,12 @@ package com.pucminas.integrations.udine;
 import com.pucminas.commons.utils.JsonUtils;
 import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.commons.utils.MessageUtils;
+import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.places.PlacesProperties;
 import com.pucminas.integrations.google.places.PlacesService;
 import com.pucminas.integrations.google.places.dto.OpeningHours;
-import com.pucminas.integrations.google.places.dto.PlaceDetailResponse;
-import com.pucminas.integrations.google.places.dto.PlaceDetailResult;
+import com.pucminas.integrations.google.places.dto.Place;
 import com.pucminas.integrations.google.speech_to_text.SpeechToTextService;
 import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
 import com.pucminas.integrations.openai.OpenAiService;
@@ -81,65 +81,52 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
     @Override
     public QuestionResponse answerQuestion(QuestionRequest questionRequest) {
-        final List<String> placesTypes = getPlacesTypesBasedOnQuestion(questionRequest.question());
-        final List<PlaceDetails> placeDetails = cacheService.getCachedValueOrNew(getClass(),
-            "CACHE_KEY_PLACE_DETAILS", questionRequest.placesId(), this::getPlacesDetailsWithContext);
+        final String question = getUserQuestion(questionRequest);
+        final List<PlaceDetails> placeDetails = getPlacesDetailsWithContext(questionRequest.placesId());
+        final boolean isAudioQuestion = QuestionFormatType.AUDIO.equals(questionRequest.formatType());
 
-        removeLocationsNotRelatedToQuestion(placeDetails, questionRequest.question());
+        removeLocationsNoRelatedToQuestion(placeDetails, question);
+
         if(CollectionUtils.isEmpty(placeDetails)) {
             return new QuestionResponse(MessageUtils.get("questions.nearby.location.not.found"), QuestionFormatType.TEXT);
         }
 
-        final String question = getUserQuestion(questionRequest);
-        final String prompt = MessageUtils.get("questions.locations.prompt", JsonUtils.toJsonString(placeDetails), question);
+        final String promptKey = isAudioQuestion ? "questions.locations.prompt.audio" : "questions.locations.prompt.text";
+        final String prompt = MessageUtils.get(promptKey, JsonUtils.toJsonString(placeDetails), question);
         final String answered = openAiService.answerQuestion(prompt);
 
         if (StringUtils.isNotBlank(answered)) {
-            if (QuestionFormatType.TEXT.equals(questionRequest.formatType())) {
+            if (!isAudioQuestion) {
                 return new QuestionResponse(answered, QuestionFormatType.TEXT);
             }
-            return new QuestionResponse(textToSpeechService.synthesizeText(answered).getAudioContent(), QuestionFormatType.AUDIO);
+
+            final String answeredNormalized = StrUtils.removeMarkdownFormatting(answered);
+            return new QuestionResponse(textToSpeechService.synthesizeText(answeredNormalized).getAudioContent(), QuestionFormatType.AUDIO);
         }
         return new QuestionResponse("Não foi possível entender o audio enviado. Verifique a qualidade da gravação e tente novamente.", QuestionFormatType.TEXT);
     }
 
-    @SuppressWarnings("unchecked")
-    private List<String> getPlacesTypesBasedOnQuestion(String question) {
-        final String prompt = MessageUtils.get("questions.identify.locations.type.based.on.question",
-            JsonUtils.toJsonString(placesProperties.getTypes()), question);
-        final String response = openAiService.answerQuestion(prompt);
-        try {
-            return JsonUtils.toObject(response, ArrayList.class);
-        } catch (Exception e) {
-            log.error(MessageUtils.get("questions.error.converts.openai.response.to.list"), e);
-            return placesProperties.getTypes();
-        }
-    }
+    private void removeLocationsNoRelatedToQuestion(List<PlaceDetails> placesDetails, String question) {
+        final String promptFilterLocations = MessageUtils.get("questions.identify.question.type", question);
+        final String placeType = StrUtils.removeDoubleQuotes(openAiService.answerQuestion(promptFilterLocations));
 
-    @SuppressWarnings("unchecked")
-    private void removeLocationsNotRelatedToQuestion(List<PlaceDetails> placesDetails, String question) {
-        final String jsonArrayLocations = JsonUtils.toJsonString(placesDetails.stream().map(PlaceDetails::name).toList());
-        final String promptFilterLocations = MessageUtils.get("questions.identify.question.type", jsonArrayLocations, question);
-        final String response = openAiService.answerQuestion(promptFilterLocations);
-        try {
-            List<String> locationsNames = JsonUtils.toObject(response, ArrayList.class);
-            placesDetails.removeIf(it -> !locationsNames.contains(it.name()));
-        } catch (Exception e) {
-            log.error(MessageUtils.get("questions.error.converts.openai.response.to.list"), e);
+        if (StringUtils.isNotEmpty(placeType) && !"empty".equals(placeType)) {
+            placesDetails.removeIf(it -> ListUtils.noneMatch(it.locationTypes(), placeType));
         }
     }
 
     private List<PlaceDetails> getPlacesDetailsWithContext(List<String> placesId) {
         final List<PlaceDetails> placeDetails = new ArrayList<>();
 
-        placesId.parallelStream().map(placesService::getPlaceDetails).map(PlaceDetailResponse::getResult)
-                .forEach(placeResult -> {
-                    final List<String> weekdayText = ListUtils.valueOrEmpty(placeResult.getOpeningHours(), OpeningHours::getWeekdayText);
-                    final String wikipediaText = getLocationDescription(placeResult);
-                    final PlaceDetails details = new PlaceDetails(placeResult.getName(), placeResult.getVicinity(),
-                            placeResult.getRating(), weekdayText, wikipediaText, placeResult.getTypes());
-                    placeDetails.add(details);
-                });
+        placesId.parallelStream().map(placesService::getPlaceDetails).forEach(place -> {
+            final List<String> openingHours = ListUtils.valueOrDefault(place.getCurrentOpeningHours(),
+                OpeningHours::getWeekdayDescriptions, place.getWeekdayDescriptions());
+            final String name = place.getDisplayName().getText();
+            final String wikipediaText = getLocationDescription(place);
+            final PlaceDetails details = new PlaceDetails(name, place.getShortFormattedAddress(),
+                place.getRating(), openingHours, wikipediaText, place.getTypes());
+            placeDetails.add(details);
+        });
 
         return placeDetails;
     }
@@ -149,22 +136,18 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
      *
      * @return String
      */
-    private String getLocationDescription(PlaceDetailResult place) {
-        final String wikipediaText = wikipediaService.getWikipediaText(place.getName());
+    private String getLocationDescription(Place place) {
+        final String name = place.getDisplayName().getText();
+        final String wikipediaText = wikipediaService.getWikipediaText(name);
         if (StringUtils.isNotBlank(wikipediaText)
-                && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.search.title.error", place.getName()))
-                && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.title.not.found", place.getName()))) {
+                && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.search.title.error", name))
+                && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.title.not.found", name))) {
             return wikipediaText;
         }
 
-        // Não usar scraping por enquanto
-        //        if(StringUtils.isNotEmpty(place.getWebsite())){
-        //            final List<String> text = scrapingService.scrapAllTextTags(place.getWebsite());
-        //        }
-
-        final String nearestTitle = wikipediaService.getNearestWikipediaTitle(new SearchByTitleAndCity(place.getName(), place.getCity()));
+        final String nearestTitle = wikipediaService.getNearestWikipediaTitle(new SearchByTitleAndCity(name, place.getCity()));
         if (StringUtils.isBlank(nearestTitle)) {
-            return MessageUtils.get("wikipedia.title.not.found", place.getName());
+            return MessageUtils.get("wikipedia.title.not.found", name);
         }
 
         return wikipediaService.getWikipediaText(nearestTitle);
