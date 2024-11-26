@@ -25,6 +25,7 @@ public class Place implements Serializable {
     private List<String> types = new ArrayList<>();
     private String nationalPhoneNumber;
     private String shortFormattedAddress;
+    private String city;
     private Location location;
     private Double rating;
     private String googleMapsUri;
@@ -36,6 +37,6 @@ public class Place implements Serializable {
     private List<String> weekdayDescriptions = new ArrayList<>();
     private OpeningHours currentOpeningHours;
     private List<Review> reviews = new ArrayList<>();
-    private String city;
+    private List<PlacePhoto> photos = new ArrayList<>();
 
 }

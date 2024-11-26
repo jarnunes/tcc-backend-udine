@@ -13,10 +13,12 @@ public interface PlacesService {
     // https://developers.google.com/maps/documentation/places/web-service/place-details?hl=pt-br
     PlacesResponse getNearbyPlaces(PlacesRequest request);
 
-    PlacesResponse getNearbyPlaces(PlacesRequest request, List<String> types);
-
     // https://developers.google.com/maps/documentation/places/web-service/details?hl=pt-br
     Place getPlaceDetails(String placeId);
 
     List<Place> getPlacesDetails(List<String> placesId);
+
+    byte[] getPlacePhoto(String photoReference);
+
+    List<byte[]> getPlacePhotos(List<String> photoReferences);
 }

@@ -5,17 +5,14 @@ import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.commons.utils.MessageUtils;
 import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
-import com.pucminas.integrations.google.places.PlacesProperties;
 import com.pucminas.integrations.google.places.PlacesService;
 import com.pucminas.integrations.google.places.dto.OpeningHours;
 import com.pucminas.integrations.google.places.dto.Place;
+import com.pucminas.integrations.google.places.dto.PlacePhoto;
 import com.pucminas.integrations.google.speech_to_text.SpeechToTextService;
 import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
 import com.pucminas.integrations.openai.OpenAiService;
-import com.pucminas.integrations.udine.vo.PlaceDetails;
-import com.pucminas.integrations.udine.vo.QuestionFormatType;
-import com.pucminas.integrations.udine.vo.QuestionRequest;
-import com.pucminas.integrations.udine.vo.QuestionResponse;
+import com.pucminas.integrations.udine.vo.*;
 import com.pucminas.integrations.wikipedia.WikipediaService;
 import com.pucminas.integrations.wikipedia.dto.SearchByTitleAndCity;
 import lombok.extern.apachecommons.CommonsLog;
@@ -25,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -36,8 +34,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
     private TextToSpeechService textToSpeechService;
     private WikipediaService wikipediaService;
     private OpenAiService openAiService;
-    private ScrapingService scrapingService;
-    private PlacesProperties placesProperties;
+
 
     @Autowired
     public void setPlacesService(PlacesService placesService) {
@@ -64,16 +61,6 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         this.openAiService = openAiService;
     }
 
-    @Autowired
-    public void setScrapingService(ScrapingService scrapingService) {
-        this.scrapingService = scrapingService;
-    }
-
-    @Autowired
-    public void setPlacesProperties(PlacesProperties placesProperties) {
-        this.placesProperties = placesProperties;
-    }
-
     @Override
     protected String serviceNameKey() {
         return "question.service.name";
@@ -81,29 +68,62 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
     @Override
     public QuestionResponse answerQuestion(QuestionRequest questionRequest) {
+        final QuestionResponse response = new QuestionResponse();
+        response.setFormatType(QuestionFormatType.TEXT);
+        response.setResponse("questions.not.possible.understand.audio");
+
+        final List<Place> places = placesService.getPlacesDetails(questionRequest.placesId());
         final String question = getUserQuestion(questionRequest);
-        final List<PlaceDetails> placeDetails = getPlacesDetailsWithContext(questionRequest.placesId());
+        final List<PlaceDetails> placeDetails = getPlacesDetailsWithContext(places);
         final boolean isAudioQuestion = QuestionFormatType.AUDIO.equals(questionRequest.formatType());
 
         removeLocationsNoRelatedToQuestion(placeDetails, question);
 
         if(CollectionUtils.isEmpty(placeDetails)) {
-            return new QuestionResponse(MessageUtils.get("questions.nearby.location.not.found"), QuestionFormatType.TEXT);
+            response.setResponse(MessageUtils.get("questions.nearby.location.not.found"));
+            response.setFormatType(QuestionFormatType.TEXT);
+            return response;
         }
 
         final String promptKey = isAudioQuestion ? "questions.locations.prompt.audio" : "questions.locations.prompt.text";
-        final String prompt = MessageUtils.get(promptKey, JsonUtils.toJsonString(placeDetails), question);
+        final String prompt = MessageUtils.get(promptKey, JsonUtils.toJsonString(QuestionLlmAnswer.LlmSample()),
+            JsonUtils.toJsonString(placeDetails), question);
         final String answered = openAiService.answerQuestion(prompt);
 
-        if (StringUtils.isNotBlank(answered)) {
-            if (!isAudioQuestion) {
-                return new QuestionResponse(answered, QuestionFormatType.TEXT);
+        try{
+            final QuestionLlmAnswer llmAnswer = JsonUtils.toObject(answered, QuestionLlmAnswer.class);
+            if (llmAnswer == null) {
+                return response;
             }
 
-            final String answeredNormalized = StrUtils.removeMarkdownFormatting(answered);
-            return new QuestionResponse(textToSpeechService.synthesizeText(answeredNormalized).getAudioContent(), QuestionFormatType.AUDIO);
+            if (llmAnswer.getIdLocation() != null) {
+                places.stream().filter(it -> it.getId().equals(llmAnswer.getIdLocation()))
+                    .map(Place::getPhotos).flatMap(Collection::stream).map(PlacePhoto::getName)
+                    .map(placesService::getPlacePhoto)
+                    .forEach(photo -> response.getPlacePhotos().add(photo));
+            }
+
+            if (StringUtils.isNotBlank(llmAnswer.getAnswer())) {
+                if (!isAudioQuestion) {
+                    response.setFormatType(QuestionFormatType.TEXT);
+                    response.setResponse(llmAnswer.getAnswer());
+                    return response;
+                }
+
+                final String answeredNormalized = StrUtils.removeMarkdownFormatting(llmAnswer.getAnswer());
+                response.setResponse(textToSpeechService.synthesizeText(answeredNormalized).getAudioContent());
+                response.setFormatType(QuestionFormatType.AUDIO);
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("Error parsing answer from llm", e);
+            response.setFormatType(QuestionFormatType.TEXT);
+            response.setResponse("Error parsing answer from llm");
+            response.setSuccess(false);
+            return response;
         }
-        return new QuestionResponse("Não foi possível entender o audio enviado. Verifique a qualidade da gravação e tente novamente.", QuestionFormatType.TEXT);
+
+        return response;
     }
 
     private void removeLocationsNoRelatedToQuestion(List<PlaceDetails> placesDetails, String question) {
@@ -115,15 +135,15 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         }
     }
 
-    private List<PlaceDetails> getPlacesDetailsWithContext(List<String> placesId) {
+    private List<PlaceDetails> getPlacesDetailsWithContext(List<Place> places) {
         final List<PlaceDetails> placeDetails = new ArrayList<>();
 
-        placesId.parallelStream().map(placesService::getPlaceDetails).forEach(place -> {
+        places.parallelStream().forEach(place -> {
             final List<String> openingHours = ListUtils.valueOrDefault(place.getCurrentOpeningHours(),
                 OpeningHours::getWeekdayDescriptions, place.getWeekdayDescriptions());
             final String name = place.getDisplayName().getText();
             final String wikipediaText = getLocationDescription(place);
-            final PlaceDetails details = new PlaceDetails(name, place.getShortFormattedAddress(),
+            final PlaceDetails details = new PlaceDetails(name, place.getId(), place.getShortFormattedAddress(),
                 place.getRating(), openingHours, wikipediaText, place.getTypes());
             placeDetails.add(details);
         });
@@ -163,6 +183,5 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
                 throw new IllegalArgumentException("Formato não suportado");
         }
     }
-
 
 }

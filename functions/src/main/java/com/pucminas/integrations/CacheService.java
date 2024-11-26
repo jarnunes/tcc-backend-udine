@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Component
 @CommonsLog
@@ -59,6 +61,30 @@ public class CacheService {
     public void clearAllCache() {
         globalCache.clear();
         saveCache();
+    }
+
+    public void putImageFile(String fileName, byte[] value){
+        putCache(fileName, "Save in localFile");
+        FileResource.instance().writerImage(fileName, value);
+    }
+
+    public byte[] getImageFile(String fileName, Supplier<byte[]> getFile){
+        final Cache cache = globalCache.get(fileName);
+        if (cache != null) {
+            if (cache.getExpiration().isBefore(LocalDateTime.now())) {
+                globalCache.remove(fileName);
+                FileResource.instance().removeImage(fileName);
+            } else {
+                final byte[] value = FileResource.instance().readImage(fileName);
+                if (ArrayUtils.isNotEmpty(value))
+                    return value;
+            }
+        }
+
+        final byte[] value = getFile.get();
+        putImageFile(fileName, value);
+
+        return value;
     }
 
     public <T> void putCache(Class<?> ownerType, String key, T params, Object value) {

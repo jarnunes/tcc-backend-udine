@@ -22,8 +22,8 @@ logging:
 udine:
   google:
     places:
-      url: ${GOOGLE_PLACES_URL:https://places.googleapis.com/v1/places}
-      nearby-search-path: ${GOOGLE_PLACES_NEARBY_SEARCH_PATH::searchNearby}
+      url: ${GOOGLE_PLACES_URL:https://places.googleapis.com/v1}
+      nearby-search-path: ${GOOGLE_PLACES_NEARBY_SEARCH_PATH:/places:searchNearby}
       apiKey: ${GOOGLE_PLACES_API_KEY}
       radius: ${GOOGLE_PLACES_RADIUS:2000}
       max-results: ${GOOGLE_PLACES_MAX_RESULTS:50}
@@ -35,7 +35,9 @@ udine:
         - tourist_attraction
         - restaurant
         - lodging
-
+      media:
+        max-width: ${GOOGLE_PLACES_MEDIA_MAX_WIDTH:400}
+        max-height: ${GOOGLE_PLACES_MEDIA_MAX_HEIGHT:400}
 
   geocode:
     url: ${GEOCODE_URL:https://maps.googleapis.com/maps/api/geocode/json}
@@ -56,7 +58,7 @@ udine:
     path: ${OPEN_AI_PATH:/v1/chat/completions}
     api-key: ${OPEN_AI_API_KEY}
     model: ${OPEN_AI_MODEL:gpt-4o-mini}
-    max-tokens: ${OPEN_AI_MAX_TOKENS:150}
+    max-tokens: ${OPEN_AI_MAX_TOKENS:200}
     temperature: ${OPEN_AI_TEMPERATURE:0.7}
     create-fake-text: ${OPEN_AI_CREATE_FAKE_TEXT:false}
     fake-text: ${OPEN_AI_FAKE_TEXT:Olá, sou o UdineTour. Este é um texto gerado automaticamente para reduzir o custo da integração com a OpenAI}

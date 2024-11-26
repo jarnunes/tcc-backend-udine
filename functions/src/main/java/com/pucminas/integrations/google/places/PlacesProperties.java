@@ -32,5 +32,10 @@ public class PlacesProperties {
     @Value("${udine.google.places.max-results}")
     private Integer maxResults;
 
+    @Value("${udine.google.places.media.max-width}")
+    private Integer mediaMaxWidth;
+
+    @Value("${udine.google.places.media.max-height}")
+    private Integer mediaMaxHeight;
 
 }

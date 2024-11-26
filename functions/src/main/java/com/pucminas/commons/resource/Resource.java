@@ -15,8 +15,19 @@ public interface Resource {
         return createPath(Paths.get(userDir(), "generated-sources"), pathNames);
     }
 
+    default String createResourceImagePathName(String fileName){
+        return createResourcePathName("images");
+    }
+
     default void createApplicationResourcePath() {
-        File directory = new File(createResourcePathName());
+        createPath();
+    }
+    default void createImagePath() {
+        createPath("images");
+    }
+
+    default void createPath(String... paths) {
+        File directory = new File(createResourcePathName(paths));
 
         if (!directory.exists()) {
             directory.mkdirs();
