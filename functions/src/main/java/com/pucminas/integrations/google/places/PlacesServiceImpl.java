@@ -5,6 +5,7 @@ import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.geocode.GeocodeService;
 import com.pucminas.integrations.google.places.dto.*;
 import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.sis.geometry.DirectPosition2D;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.referencing.GeodeticCalculator;
@@ -43,7 +44,9 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
 
     @Override
     public PlacesResponse searchNearby(PlacesSearchNearbyRequest request) {
-        request.setIncludedTypes(properties.getTypes());
+        if (CollectionUtils.isEmpty(request.getIncludedTypes())) {
+            request.setIncludedTypes(properties.getTypes());
+        }
 
         final PlaceRequestRestrictionCircle circle = request.getLocationRestriction().getCircle();
         if (circle.getRadius() == null) {
@@ -147,7 +150,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
     }
 
     @Override
-    public PlacePhoto getPlacePhoto(String photoReference) {
+    public Photo getPlacePhoto(String photoReference) {
         final String[] photoReferenceParts = photoReference.split("/");
         final String photoReferenceId = photoReferenceParts[photoReferenceParts.length - 1];
         final String placeId = photoReferenceParts[photoReferenceParts.length - 3];
@@ -173,14 +176,14 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
                     return photo;
                 }));
 
-        final PlacePhoto placePhoto = new PlacePhoto();
+        final Photo placePhoto = new Photo();
         placePhoto.setName(fileName);
-        placePhoto.setContent(content);
+        placePhoto.setContent(Base64.getEncoder().encodeToString(content));
         return placePhoto;
     }
 
     @Override
-    public List<PlacePhoto> getPlacePhotos(List<String> photoReferences) {
+    public List<Photo> getPlacePhotos(List<String> photoReferences) {
         return photoReferences.parallelStream().map(this::getPlacePhoto).toList();
     }
 

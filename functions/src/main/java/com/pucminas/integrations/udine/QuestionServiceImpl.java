@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @CommonsLog
@@ -149,13 +150,20 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         }
     }
 
-    private List<PlacePhoto> getPlacesPhotos(List<String> idsLocations, List<Place> places){
+    private List<PlacePhoto> getPlacesPhotos(List<String> idsLocations, List<Place> places) {
         final List<PlacePhoto> photos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(idsLocations)) {
-            places.stream().filter(it -> it.getId().equals(idsLocations.getFirst()))
-                .map(Place::getPhotos).flatMap(Collection::stream).map(PlacePhoto::getName)
-                .map(placesService::getPlacePhoto)
-                .forEach(photos::add);
+            final Map<String, Place> placesMap = ListUtils.toMap(places, Place::getId);
+            for (String id : idsLocations) {
+                final Place place = placesMap.get(id);
+                if (place != null) {
+                    final PlacePhoto placePhoto = new PlacePhoto();
+                    placePhoto.setName(place.getDisplayName().getText());
+                    place.getPhotos().stream().map(PlacePhoto::getName)
+                         .map(placesService::getPlacePhoto).forEach(placePhoto::addPhoto);
+                    photos.add(placePhoto);
+                }
+            }
         }
 
         return photos;

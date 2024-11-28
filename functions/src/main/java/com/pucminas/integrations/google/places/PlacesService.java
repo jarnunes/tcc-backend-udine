@@ -22,7 +22,7 @@ public interface PlacesService {
 
     List<Place> getPlacesDetails(List<String> placesId);
 
-    PlacePhoto getPlacePhoto(String photoReference);
+    Photo getPlacePhoto(String photoReference);
 
-    List<PlacePhoto> getPlacePhotos(List<String> photoReferences);
+    List<Photo> getPlacePhotos(List<String> photoReferences);
 }

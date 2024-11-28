@@ -1,8 +1,10 @@
 package com.pucminas.commons.utils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ListUtils {
 
@@ -15,5 +17,9 @@ public class ListUtils {
 
     public static <T extends Comparable<T>> boolean noneMatch(List<T> values, T reference) {
         return values.stream().noneMatch(value -> value.equals(reference));
+    }
+
+    public static <K, V> Map<K, V> toMap(List<V> values, Function<V, K> keyMapper) {
+        return values.stream().collect(Collectors.toMap(keyMapper, Function.identity()));
     }
 }
