@@ -36,10 +36,21 @@ udine:
       types:
         - tourist_attraction
         - restaurant
-        - lodging
+        - hotel
       media:
         max-width: ${GOOGLE_PLACES_MEDIA_MAX_WIDTH:400}
         max-height: ${GOOGLE_PLACES_MEDIA_MAX_HEIGHT:400}
+      fields-mask:
+        - places.id
+        - places.types
+        - places.displayName
+        - places.nationalPhoneNumber
+        - places.shortFormattedAddress
+        - places.location
+        - places.rating
+        - places.regularOpeningHours
+        - places.currentOpeningHours
+        - places.photos
 
   geocode:
     url: ${GEOCODE_URL:https://maps.googleapis.com/maps/api/geocode/json}

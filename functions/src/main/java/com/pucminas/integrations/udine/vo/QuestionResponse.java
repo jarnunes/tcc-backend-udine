@@ -1,6 +1,7 @@
 package com.pucminas.integrations.udine.vo;
 
 import com.pucminas.commons.utils.MessageUtils;
+import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.google.places.dto.PlacePhoto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,7 +49,8 @@ public class QuestionResponse implements Serializable {
 
         public Builder response(String response) {
             if (questionResponse.formatType.isAudio()) {
-                questionResponse.setResponse(processAudioQuestion.apply(response));
+                final String answer = StrUtils.removeMarkdownFormatting(response);
+                questionResponse.setResponse(processAudioQuestion.apply(answer));
             } else {
                 questionResponse.setResponse(response);
             }

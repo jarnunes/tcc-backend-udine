@@ -18,7 +18,6 @@ public class PlacesSearchNearbyRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = -472297264770491541L;
     private PlaceRequestRestriction locationRestriction;
-    private Integer pageSize = 20;
     private List<String> includedTypes = new ArrayList<>();
 
     public void addIncludedType(String type) {

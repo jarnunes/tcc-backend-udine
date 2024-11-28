@@ -1,6 +1,7 @@
 package com.pucminas.commons.utils;
 
 import com.ibm.icu.text.Transliterator;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +42,10 @@ public class StrUtils {
 
     public static String removeDoubleQuotes(String value) {
         return value.replaceAll("\"", "");
+    }
+
+    public static String removeJsonQuotes(String value){
+        return StringUtils.removeStart(StringUtils.removeEnd(value, "```"), "```json");
     }
 
 }

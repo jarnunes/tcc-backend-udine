@@ -4,6 +4,7 @@ import com.pucminas.commons.utils.JsonUtils;
 import com.pucminas.commons.utils.MessageUtils;
 import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
+import com.pucminas.integrations.google.places.dto.Place;
 import com.pucminas.integrations.google.places.dto.QuestionApiUsage;
 import com.pucminas.integrations.openai.vo.OpenAiRequest;
 import com.pucminas.integrations.openai.vo.OpenAiResponse;
@@ -68,6 +69,11 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
     }
 
     @Override
+    public String generateShortDescriptionFromPlaces(List<Place> places) {
+        return "";
+    }
+
+    @Override
     public String generateShortDescription(String locationName) {
         final String prompt = MessageUtils.get("openai.generate.location.short.description.prompt", locationName);
         return processPromptWithRateLimiting(prompt);
@@ -75,7 +81,7 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
 
     @Override
     public String answerQuestion(String questionPrompt) {
-        return processPromptWithRateLimiting(questionPrompt);
+        return StrUtils.removeJsonQuotes(processPromptWithRateLimiting(questionPrompt));
     }
 
     @Override

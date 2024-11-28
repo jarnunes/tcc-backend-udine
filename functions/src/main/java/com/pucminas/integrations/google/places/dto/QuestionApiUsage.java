@@ -21,7 +21,7 @@ public class QuestionApiUsage implements Serializable {
     private ClassificationType classification;
     private LocationType locationType;
     private String textQuery;
-    private Boolean showPhotos;
+    private boolean showPhotos;
 
     public String locationType() {
         return locationType.getValue();

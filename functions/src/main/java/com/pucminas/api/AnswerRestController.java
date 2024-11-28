@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/answerQuestion")
-public class AnswerQuestionRestController extends RestControllerBase {
+@RequestMapping("/answer")
+public class AnswerRestController extends RestControllerBase {
 
     private QuestionServiceImpl questionService;
 
@@ -21,7 +21,7 @@ public class AnswerQuestionRestController extends RestControllerBase {
         this.questionService = questionService;
     }
 
-    @PostMapping
+    @PostMapping("/places-question")
     public ResponseEntity<QuestionResponse> apply(@RequestBody QuestionRequest request) {
         QuestionResponse response = super.processRequest(request, questionService::answerQuestion);
         return ResponseEntity.ok(response);
@@ -29,7 +29,7 @@ public class AnswerQuestionRestController extends RestControllerBase {
 
     @Override
     protected String serviceName() {
-        return "AnswerQuestionRestController";
+        return "AnswerRestController";
     }
 
 }

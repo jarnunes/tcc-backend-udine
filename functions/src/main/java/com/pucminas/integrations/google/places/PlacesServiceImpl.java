@@ -57,21 +57,24 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         // https://stackoverflow.com/questions/77898813/next-page-token-for-new-google-maps-places-api-nearbysearch-pagination
         for (String placeType : includedTypes) {
             request.setIncludedTypes(Collections.singletonList(placeType));
-            final PlacesResponse responseByType = processWithAttempts(properties.getConnectionAttempts(), request, () ->
-                    getBuilder()
-                            .baseUrl(properties.getUrl())
-                            .build().post()
-                            .uri(uriBuilder -> uriBuilder
-                                    .path(properties.getSearchNearbyPath())
-                                    .queryParamIfPresent("pagetoken", Optional.ofNullable(nextPageToken.get()))
-                                    .build())
-                            .header("Accept-Language", "pt")
-                            .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
-                            .header("X-Goog-FieldMask", "*")
-                            .bodyValue(request)
-                            .retrieve()
-                            .bodyToMono(PlacesResponse.class)
-                            .block());
+
+            final PlacesResponse responseByType =
+                    cacheService.getCachedValueOrNew(getClass(), KEY_PLACES_SERVICE_SEARCH_NEARBY, request, it ->
+                            processWithAttempts(properties.getConnectionAttempts(), request, () ->
+                                    getBuilder()
+                                            .baseUrl(properties.getUrl())
+                                            .build().post()
+                                            .uri(uriBuilder -> uriBuilder
+                                                    .path(properties.getSearchNearbyPath())
+                                                    .queryParamIfPresent("pagetoken", Optional.ofNullable(nextPageToken.get()))
+                                                    .build())
+                                            .header("Accept-Language", "pt")
+                                            .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
+                                            .header("X-Goog-FieldMask", properties.joinFieldsMask())
+                                            .bodyValue(request)
+                                            .retrieve()
+                                            .bodyToMono(PlacesResponse.class)
+                                            .block()));
 
             response.getPlaces().parallelStream().forEach(place -> {
                 final String city = geocodeService.getCityName(place.getLocation().getLatitude(), place.getLocation().getLongitude());
@@ -90,9 +93,6 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
 
     @Override
     public PlacesResponse searchText(PlacesSearchTextRequest request) {
-        //TODO: Remover depois.
-        cacheService.removeCacheItem(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request);
-
         return cacheService.getCachedValueOrNew(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request, it ->
                 processWithAttempts(properties.getConnectionAttempts(), request, () ->
                         getBuilder().baseUrl(properties.getUrl())
@@ -102,7 +102,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
                                         .build())
                                 .header("Accept-Language", "pt")
                                 .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
-                                .header("X-Goog-FieldMask", "*")
+                                .header("X-Goog-FieldMask", properties.joinFieldsMask())
                                 .bodyValue(request)
                                 .retrieve()
                                 .bodyToMono(PlacesResponse.class)
@@ -125,7 +125,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
                             .build())
                     .header("Accept-Language", "pt")
                     .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
-                    .header("X-Goog-FieldMask", "*")
+                    .header("X-Goog-FieldMask", properties.joinFieldsMask())
                     .retrieve()
                     .bodyToMono(Place.class)
                     .block();
@@ -152,12 +152,11 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         final String photoReferenceId = photoReferenceParts[photoReferenceParts.length - 1];
         final String placeId = photoReferenceParts[photoReferenceParts.length - 3];
         final String fileName = placeId + "_-_" + photoReferenceId + ".jpg";
-
-        byte[] content = cacheService.getImageFile(fileName, () ->
+        final byte[] content = cacheService.getImageFile(fileName, () ->
                 processWithAttempts(3, photoReference, () -> {
                     final byte[] photo = getBuilder()
                             .clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
-                            .baseUrl("http://localhost:8085/v1/photos")
+                            .baseUrl(properties.getUrl())
                             .build().get()
                             .uri(uriBuilder -> uriBuilder
                                     .path("/" + photoReference)
@@ -178,33 +177,6 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         placePhoto.setName(fileName);
         placePhoto.setContent(content);
         return placePhoto;
-
-//        byte[] content = cacheService.getImageFile(fileName, () ->
-//                processWithAttempts(3, photoReference, () -> {
-//                    final byte[] photo = getBuilder()
-//                            .clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
-//                            .baseUrl(properties.getUrl())
-//                            .build().get()
-//                            .uri(uriBuilder -> uriBuilder
-//                                    .path("/" + photoReference)
-//                                    .path("/media")
-//                                    .queryParam("maxWidthPx", properties.getMediaMaxWidth())
-//                                    .queryParam("maxHeightPx", properties.getMediaMaxHeight())
-//                                    .queryParam("key", properties.getGooglePlacesApiKey())
-//                                    .build())
-//                            .retrieve()
-//                            .bodyToMono(byte[].class)
-//                            .block();
-//
-//                    cacheService.putImageFile(fileName, photo);
-//                    return photo;
-//                }));
-//
-//        final PlacePhoto placePhoto = new PlacePhoto();
-//        placePhoto.setName(fileName);
-//        placePhoto.setContent(content);
-//        return placePhoto;
-
     }
 
     @Override

@@ -22,6 +22,8 @@ public class PlacesProperties {
     @Value("${udine.google.places.search-nearby-path}")
     private String searchNearbyPath;
 
+    private List<String> fieldsmask = new ArrayList<>();
+
     @Value("${udine.google.places.search-text-path}")
     private String searchTextPath;
 
@@ -44,4 +46,7 @@ public class PlacesProperties {
     @Value("${udine.google.places.media.max-height}")
     private Integer mediaMaxHeight;
 
+    public String joinFieldsMask() {
+        return String.join(",", fieldsmask);
+    }
 }

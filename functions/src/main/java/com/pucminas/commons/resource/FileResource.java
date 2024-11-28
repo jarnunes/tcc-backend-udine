@@ -2,8 +2,10 @@ package com.pucminas.commons.resource;
 
 
 import com.pucminas.commons.functions.ResourceConsumerThrows;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,5 +89,19 @@ public class FileResource implements Resource {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String readDefaultFile(String fileName) {
+        final ClassPathResource resource = new ClassPathResource("/default/" + fileName);
+        final StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return content.toString();
     }
 }

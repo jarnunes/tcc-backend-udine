@@ -27,7 +27,7 @@ public abstract class ServiceBase {
     }
 
     protected <T, R> R processWithAttempts(final Integer connectionsAttempts, final T request, final ActionThrows<R> processRequest) {
-        log.debug(MessageUtils.get("integrations.request",  JsonUtils.toJsonString(request)));
+        log.info(MessageUtils.get("integrations.request",  JsonUtils.toJsonString(request)));
 
         int connectionsAttempted = 0;
         do {

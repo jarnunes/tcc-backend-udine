@@ -102,9 +102,12 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         } else if (apiDef.getLocationType().isHotel()) {
             placeDetails.addAll(getPlacesDetails(places));
             answer = answerQuestion("openai.generate.response.for.hotel", question, placeDetails);
-        } else {
+        } else if (apiDef.getLocationType().isTouristAttraction()) {
             placeDetails.addAll(getPlacesDetailsWithContext(places));
             answer = answerQuestion("openai.generate.response.for.tourist.attraction", question, placeDetails);
+        } else {
+            placeDetails.addAll(getPlacesDetailsWithContext(places));
+            answer = answerQuestion("openai.generate.response.for.locations", question, placeDetails);
         }
 
         if(answer == null) {
@@ -114,7 +117,11 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
                     .build();
         }
 
-        final List<PlacePhoto> photos =  getPlacesPhotos(answer.getIdLocations(), places);
+        final List<PlacePhoto> photos =  new ArrayList<>();
+        if(apiDef.isShowPhotos() && CollectionUtils.isNotEmpty(answer.getIdLocations())){
+            photos.addAll(getPlacesPhotos(answer.getIdLocations(), places));
+        }
+
         return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
                 .response(answer.getAnswer())
                 .placePhotos(photos)
