@@ -92,6 +92,11 @@ public class CacheService {
         putCache(cacheKey, value);
     }
 
+    public void removeCacheItem(Class<?> ownerType, String key, Object params) {
+        final String cacheKey = getCacheKey(ownerType, key, params);
+        globalCache.remove(cacheKey);
+    }
+
     @SuppressWarnings("unchecked")
     public <T, R> R getCachedValueOrNew(Class<?> ownerType, String key, T params, Function<T, R> getValue) {
         final String cacheKey = getCacheKey(ownerType, key, params);
@@ -109,10 +114,21 @@ public class CacheService {
         return value;
     }
 
-    public void putCache(String key, Object value) {
+    public <T> void putCache(String key, T value) {
         globalCache.put(key, new Cache(value, LocalDateTime.now().plusDays(20)));
     }
 
+    public <T> T getCachedValue(String key){
+        final Cache cache = globalCache.get(key);
+        if (cache != null) {
+            if (cache.getExpiration().isBefore(LocalDateTime.now())) {
+                globalCache.remove(key);
+            } else {
+                return (T) cache.getValue();
+            }
+        }
+        return null;
+    }
 
     private String getCacheKey(Class<?> clazz, String key, Object params) {
         final String paramsKey = params == null ? "null" : params.toString();

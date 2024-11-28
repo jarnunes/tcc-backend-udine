@@ -8,7 +8,14 @@ public interface PlacesService {
 
     // https://developers.google.com/maps/documentation/places/web-service/reference/rpc/google.maps.places.v1?hl=pt-br
     // https://developers.google.com/maps/documentation/places/web-service/place-details?hl=pt-br
-    PlacesResponse getNearbyPlaces(PlacesRequest request);
+    // https://developers.google.com/maps/documentation/places/web-service/nearby-search?hl=pt-br
+    PlacesResponse searchNearby(PlacesSearchNearbyRequest request);
+    PlacesResponse searchText(PlacesSearchTextRequest request);
+
+    void sortPlacesByRanting(List<Place> places);
+    void sortPlacesByDistance(List<Place> places);
+    void complementWithDistance(List<Place> places, Location location);
+    void complementWithCityName(List<Place> places);
 
     // https://developers.google.com/maps/documentation/places/web-service/details?hl=pt-br
     Place getPlaceDetails(String placeId);

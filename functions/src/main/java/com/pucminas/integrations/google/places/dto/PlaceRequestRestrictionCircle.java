@@ -16,6 +16,6 @@ public class PlaceRequestRestrictionCircle implements Serializable {
     @Serial
     private static final long serialVersionUID = 6570700492827260839L;
 
-    private PlaceRequestRestrictionCenter center;
+    private Location center;
     private Double radius;
 }

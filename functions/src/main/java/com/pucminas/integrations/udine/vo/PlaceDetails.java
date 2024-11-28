@@ -1,8 +1,29 @@
 package com.pucminas.integrations.udine.vo;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public record PlaceDetails(String name, String id, String address, Double ranting, List<String> opening_hours,
-    String wikipediaDescription, List<String> locationTypes) implements Serializable {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class PlaceDetails implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 3924624425814428956L;
+    private String name;
+    private String id;
+    private String address;
+    private Double ranting;
+    private List<String> opening_hours;
+    private String wikipediaDescription;
+    private List<String> locationTypes;
+    private Double distance;
+
 }

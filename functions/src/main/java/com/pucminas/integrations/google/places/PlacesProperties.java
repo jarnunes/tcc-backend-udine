@@ -13,11 +13,17 @@ import java.util.List;
 @ConfigurationProperties(prefix = "udine.google.places")
 public class PlacesProperties {
 
+    @Value("${udine.google.places.connection-attempts}")
+    private Integer connectionAttempts;
+
     @Value("${udine.google.places.url}")
     private String url;
 
-    @Value("${udine.google.places.nearby-search-path}")
-    private String nearbySearchPath;
+    @Value("${udine.google.places.search-nearby-path}")
+    private String searchNearbyPath;
+
+    @Value("${udine.google.places.search-text-path}")
+    private String searchTextPath;
 
     @Value("${udine.google.places.apiKey}")
     private String googlePlacesApiKey;

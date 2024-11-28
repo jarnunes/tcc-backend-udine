@@ -1,9 +1,13 @@
 package com.pucminas.integrations.google.places;
 
+import com.pucminas.commons.utils.NumberUtils;
 import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.geocode.GeocodeService;
 import com.pucminas.integrations.google.places.dto.*;
 import lombok.extern.apachecommons.CommonsLog;
+import org.apache.sis.geometry.DirectPosition2D;
+import org.apache.sis.referencing.CommonCRS;
+import org.apache.sis.referencing.GeodeticCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
@@ -15,7 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 @CommonsLog
 public class PlacesServiceImpl extends ServiceBase implements PlacesService {
-    private static final String KEY_PLACES_SERVICE_PLACE_NEARBY = "KEY_PLACES_SERVICE_PLACE_NEARBY";
+    private static final String KEY_PLACES_SERVICE_SEARCH_NEARBY = "KEY_PLACES_SERVICE_SEARCH_NEARBY";
+    private static final String KEY_PLACES_SERVICE_SEARCH_TEXT = "KEY_PLACES_SERVICE_SEARCH_TEXT";
     private static final String KEY_PLACES_SERVICE_PLACE_DETAILS = "KEY_PLACES_SERVICE_PLACES_DETAILS";
 
     private PlacesProperties properties;
@@ -37,7 +42,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
     }
 
     @Override
-    public PlacesResponse getNearbyPlaces(PlacesRequest request) {
+    public PlacesResponse searchNearby(PlacesSearchNearbyRequest request) {
         request.setIncludedTypes(properties.getTypes());
 
         final PlaceRequestRestrictionCircle circle = request.getLocationRestriction().getCircle();
@@ -45,11 +50,6 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
             circle.setRadius(properties.getRadius());
         }
 
-        return cacheService.getCachedValueOrNew(getClass(), KEY_PLACES_SERVICE_PLACE_NEARBY, request,
-                this::getNearbyPlacesLocation);
-    }
-
-    private PlacesResponse getNearbyPlacesLocation(PlacesRequest request) {
         final Set<String> includedTypes = new HashSet<>(request.getIncludedTypes());
         final PlacesResponse response = new PlacesResponse();
         final AtomicReference<String> nextPageToken = new AtomicReference<>();
@@ -57,20 +57,21 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         // https://stackoverflow.com/questions/77898813/next-page-token-for-new-google-maps-places-api-nearbysearch-pagination
         for (String placeType : includedTypes) {
             request.setIncludedTypes(Collections.singletonList(placeType));
-            final PlacesResponse responseByType = processWithAttempts(3, request, () -> getBuilder()
-                    .baseUrl(properties.getUrl())
-                    .build().post()
-                    .uri(uriBuilder -> uriBuilder
-                            .path(properties.getNearbySearchPath())
-                            .queryParamIfPresent("pagetoken", Optional.ofNullable(nextPageToken.get()))
-                            .build())
-                    .header("Accept-Language", "pt")
-                    .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
-                    .header("X-Goog-FieldMask", "*")
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(PlacesResponse.class)
-                    .block());
+            final PlacesResponse responseByType = processWithAttempts(properties.getConnectionAttempts(), request, () ->
+                    getBuilder()
+                            .baseUrl(properties.getUrl())
+                            .build().post()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path(properties.getSearchNearbyPath())
+                                    .queryParamIfPresent("pagetoken", Optional.ofNullable(nextPageToken.get()))
+                                    .build())
+                            .header("Accept-Language", "pt")
+                            .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
+                            .header("X-Goog-FieldMask", "*")
+                            .bodyValue(request)
+                            .retrieve()
+                            .bodyToMono(PlacesResponse.class)
+                            .block());
 
             response.getPlaces().parallelStream().forEach(place -> {
                 final String city = geocodeService.getCityName(place.getLocation().getLatitude(), place.getLocation().getLongitude());
@@ -81,10 +82,31 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         }
 
         for (Place place : response.getPlaces()) {
-            cacheService.putCache(getClass(), KEY_PLACES_SERVICE_PLACE_DETAILS, place.getId(), place);
+            cacheService.putCache(place.getId(), place);
         }
 
         return response;
+    }
+
+    @Override
+    public PlacesResponse searchText(PlacesSearchTextRequest request) {
+        //TODO: Remover depois.
+        cacheService.removeCacheItem(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request);
+
+        return cacheService.getCachedValueOrNew(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request, it ->
+                processWithAttempts(properties.getConnectionAttempts(), request, () ->
+                        getBuilder().baseUrl(properties.getUrl())
+                                .build().post()
+                                .uri(uriBuilder -> uriBuilder
+                                        .path(properties.getSearchTextPath())
+                                        .build())
+                                .header("Accept-Language", "pt")
+                                .header("X-Goog-Api-Key", properties.getGooglePlacesApiKey())
+                                .header("X-Goog-FieldMask", "*")
+                                .bodyValue(request)
+                                .retrieve()
+                                .bodyToMono(PlacesResponse.class)
+                                .block()));
     }
 
     @Override
@@ -131,13 +153,11 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         final String placeId = photoReferenceParts[photoReferenceParts.length - 3];
         final String fileName = placeId + "_-_" + photoReferenceId + ".jpg";
 
-
-
         byte[] content = cacheService.getImageFile(fileName, () ->
                 processWithAttempts(3, photoReference, () -> {
                     final byte[] photo = getBuilder()
                             .clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
-                            .baseUrl(properties.getUrl())
+                            .baseUrl("http://localhost:8085/v1/photos")
                             .build().get()
                             .uri(uriBuilder -> uriBuilder
                                     .path("/" + photoReference)
@@ -159,6 +179,32 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         placePhoto.setContent(content);
         return placePhoto;
 
+//        byte[] content = cacheService.getImageFile(fileName, () ->
+//                processWithAttempts(3, photoReference, () -> {
+//                    final byte[] photo = getBuilder()
+//                            .clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
+//                            .baseUrl(properties.getUrl())
+//                            .build().get()
+//                            .uri(uriBuilder -> uriBuilder
+//                                    .path("/" + photoReference)
+//                                    .path("/media")
+//                                    .queryParam("maxWidthPx", properties.getMediaMaxWidth())
+//                                    .queryParam("maxHeightPx", properties.getMediaMaxHeight())
+//                                    .queryParam("key", properties.getGooglePlacesApiKey())
+//                                    .build())
+//                            .retrieve()
+//                            .bodyToMono(byte[].class)
+//                            .block();
+//
+//                    cacheService.putImageFile(fileName, photo);
+//                    return photo;
+//                }));
+//
+//        final PlacePhoto placePhoto = new PlacePhoto();
+//        placePhoto.setName(fileName);
+//        placePhoto.setContent(content);
+//        return placePhoto;
+
     }
 
     @Override
@@ -166,4 +212,39 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         return photoReferences.parallelStream().map(this::getPlacePhoto).toList();
     }
 
+    @Override
+    public void complementWithDistance(List<Place> places, Location location) {
+        final DirectPosition2D referenceLocation = new DirectPosition2D(CommonCRS.WGS84.geographic(), location.getLatitude(), location.getLongitude());
+        places.forEach(place -> place.setDistance(calculateDistance(referenceLocation, placeToDirectPosition2D(place))));
+    }
+
+    private DirectPosition2D placeToDirectPosition2D(Place place) {
+        return new DirectPosition2D(place.getLocation().getLatitude(), place.getLocation().getLongitude());
+    }
+
+    private double calculateDistance(DirectPosition2D reference, DirectPosition2D location) {
+        GeodeticCalculator calculator = GeodeticCalculator.create(reference.getCoordinateReferenceSystem());
+        calculator.setStartPoint(reference);
+        calculator.setEndPoint(location);
+        return NumberUtils.setScale(calculator.getGeodesicDistance());
+    }
+
+    @Override
+    public void sortPlacesByRanting(List<Place> places) {
+        places.sort(Comparator.comparingDouble(Place::getRating));
+    }
+
+    @Override
+    public void sortPlacesByDistance(List<Place> places) {
+        places.sort(Comparator.comparingDouble(Place::getDistance));
+    }
+
+    @Override
+    public void complementWithCityName(List<Place> places) {
+        places.parallelStream().forEach(place -> {
+            final Location location = place.getLocation();
+            final String city = geocodeService.getCityName(location.getLatitude(), location.getLongitude());
+            place.setCity(city);
+        });
+    }
 }

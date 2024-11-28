@@ -4,6 +4,7 @@ import com.pucminas.commons.utils.JsonUtils;
 import com.pucminas.commons.utils.MessageUtils;
 import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
+import com.pucminas.integrations.google.places.dto.QuestionApiUsage;
 import com.pucminas.integrations.openai.vo.OpenAiRequest;
 import com.pucminas.integrations.openai.vo.OpenAiResponse;
 import com.pucminas.integrations.wikipedia.dto.SearchLike;
@@ -60,7 +61,6 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
                     .block());
     }
 
-
     @Override
     public String generateShortDescription(List<String> locationsName) {
         final String prompt = MessageUtils.get("openai.generate.locations.short.description.prompt", StrUtils.joinComma(locationsName));
@@ -83,6 +83,13 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
         final String prompt = MessageUtils.get("openai.find.location.name", searchTitle, JsonUtils.toJsonString(searchResults));
         final String response = processPromptWithRateLimiting(prompt);
         return StringUtils.equals("NOT_FOUND", response) ? null : StringUtils.replace(response, "\"", "");
+    }
+
+    @Override
+    public QuestionApiUsage determineWhichGoogleMapsApiToUse(String question) {
+        final String prompt = MessageUtils.get("openai.google.maps.decision.prompt", question);
+        final String response = processPromptWithRateLimiting(prompt);
+        return JsonUtils.toObject(response, QuestionApiUsage.class);
     }
 
     private String processPromptWithRateLimiting(String prompt) {

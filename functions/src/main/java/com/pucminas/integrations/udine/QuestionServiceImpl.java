@@ -3,12 +3,10 @@ package com.pucminas.integrations.udine;
 import com.pucminas.commons.utils.JsonUtils;
 import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.commons.utils.MessageUtils;
-import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
+import com.pucminas.integrations.google.places.PlacesProperties;
 import com.pucminas.integrations.google.places.PlacesService;
-import com.pucminas.integrations.google.places.dto.OpeningHours;
-import com.pucminas.integrations.google.places.dto.Place;
-import com.pucminas.integrations.google.places.dto.PlacePhoto;
+import com.pucminas.integrations.google.places.dto.*;
 import com.pucminas.integrations.google.speech_to_text.SpeechToTextService;
 import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
 import com.pucminas.integrations.openai.OpenAiService;
@@ -34,7 +32,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
     private TextToSpeechService textToSpeechService;
     private WikipediaService wikipediaService;
     private OpenAiService openAiService;
-
+    private PlacesProperties placesProperties;
 
     @Autowired
     public void setPlacesService(PlacesService placesService) {
@@ -61,6 +59,11 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         this.openAiService = openAiService;
     }
 
+    @Autowired
+    public void setPlacesProperties(PlacesProperties placesProperties) {
+        this.placesProperties = placesProperties;
+    }
+
     @Override
     protected String serviceNameKey() {
         return "question.service.name";
@@ -68,73 +71,111 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
     @Override
     public QuestionResponse answerQuestion(QuestionRequest questionRequest) {
-        final QuestionResponse response = new QuestionResponse();
-        response.setFormatType(QuestionFormatType.TEXT);
-        response.setResponse("questions.not.possible.understand.audio");
-
-        final List<Place> places = placesService.getPlacesDetails(questionRequest.placesId());
-        final List<PlacePhoto> placePhotos = new ArrayList<>();
+        final boolean isAudioQuestion = QuestionFormatType.AUDIO.equals(questionRequest.getFormatType());
         final String question = getUserQuestion(questionRequest);
-        final List<PlaceDetails> placeDetails = getPlacesDetailsWithContext(places);
-        final boolean isAudioQuestion = QuestionFormatType.AUDIO.equals(questionRequest.formatType());
 
-        removeLocationsNoRelatedToQuestion(placeDetails, question);
-
-        if(CollectionUtils.isEmpty(placeDetails)) {
+        final QuestionApiUsage apiDef = openAiService.determineWhichGoogleMapsApiToUse(question);
+        if(apiDef == null || apiDef.getApi().isNone()) {
             return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
-                    .response(MessageUtils.get("questions.nearby.location.not.found"))
-                    .placePhotos(placePhotos)
-                    .success(false)
+                    .responseMsgKey("questions.interpretable.question")
+                    .placePhotos(List.of())
                     .build();
         }
 
-        final String promptKey = isAudioQuestion ? "questions.locations.prompt.audio" : "questions.locations.prompt.text";
-        final String prompt = MessageUtils.get(promptKey, JsonUtils.toJsonString(QuestionLlmAnswer.LlmSample()),
-            JsonUtils.toJsonString(placeDetails), question);
-        final String answered = openAiService.answerQuestion(prompt);
-
-        try{
-            final QuestionLlmAnswer llmAnswer = JsonUtils.toObject(answered, QuestionLlmAnswer.class);
-            if (llmAnswer == null) {
-                return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
-                        .response("Ocorreu um erro no servidor. Tente novamente em alguns minutos")
-                        .placePhotos(placePhotos)
-                        .success(false)
-                        .build();
-            }
-
-            if (llmAnswer.getIdLocation() != null) {
-                places.stream().filter(it -> it.getId().equals(llmAnswer.getIdLocation()))
-                    .map(Place::getPhotos).flatMap(Collection::stream).map(PlacePhoto::getName)
-                    .map(placesService::getPlacePhoto)
-                    .forEach(placePhotos::add);
-            }
-
-            if (StringUtils.isNotBlank(llmAnswer.getAnswer())) {
-                return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
-                        .response(llmAnswer.getAnswer())
-                        .placePhotos(placePhotos)
-                        .build();
-            }
-        } catch (Exception e) {
-            log.error("Erro ao processar resposta obtida do LLM", e);
+        final List<Place> places = getPlacesBasedOnQuestion(apiDef, questionRequest.getLocation());
+        if(places.isEmpty()) {
             return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
-                    .response("Ocorreu um erro no servidor. Tente novamente em alguns minutos")
-                    .placePhotos(placePhotos)
-                    .success(false)
+                    .responseMsgKey("questions.nearby.location.not.found")
+                    .placePhotos(List.of())
                     .build();
         }
 
-        return response;
+        placesService.complementWithDistance(places, questionRequest.getLocation());
+        placesService.complementWithCityName(places);
+        sortPlaces(apiDef, places);
+
+        final List<PlaceDetails> placeDetails = new ArrayList<>();
+        QuestionLlmAnswer answer;
+        if (apiDef.getLocationType().isRestaurant()) {
+            placeDetails.addAll(getPlacesDetails(places));
+            answer = answerQuestion("openai.generate.response.for.restaurant", question, placeDetails);
+        } else if (apiDef.getLocationType().isHotel()) {
+            placeDetails.addAll(getPlacesDetails(places));
+            answer = answerQuestion("openai.generate.response.for.hotel", question, placeDetails);
+        } else {
+            placeDetails.addAll(getPlacesDetailsWithContext(places));
+            answer = answerQuestion("openai.generate.response.for.tourist.attraction", question, placeDetails);
+        }
+
+        if(answer == null) {
+            return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
+                    .responseMsgKey("questions.interpretable.question")
+                    .placePhotos(List.of())
+                    .build();
+        }
+
+        final List<PlacePhoto> photos =  getPlacesPhotos(answer.getIdLocations(), places);
+        return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
+                .response(answer.getAnswer())
+                .placePhotos(photos)
+                .build();
     }
 
-    private void removeLocationsNoRelatedToQuestion(List<PlaceDetails> placesDetails, String question) {
-        final String promptFilterLocations = MessageUtils.get("questions.identify.question.type", question);
-        final String placeType = StrUtils.removeDoubleQuotes(openAiService.answerQuestion(promptFilterLocations));
+    private QuestionLlmAnswer answerQuestion(final String promptKey, final String question, List<PlaceDetails> placeDetails) {
+        final String prompt = MessageUtils.get(promptKey, question, JsonUtils.toJsonString(placeDetails));
+        final String response = openAiService.answerQuestion(prompt);
 
-        if (StringUtils.isNotEmpty(placeType) && !"empty".equals(placeType)) {
-            placesDetails.removeIf(it -> ListUtils.noneMatch(it.locationTypes(), placeType));
+        try {
+            log.info("Resposta obtida do LLM: " + response);
+            return JsonUtils.toObject(response, QuestionLlmAnswer.class);
+        } catch (Exception e) {
+            log.error("Erro ao processar resposta obtida do LLM", e);
+            return null;
         }
+    }
+
+    private void sortPlaces(QuestionApiUsage apiDef, List<Place> places) {
+        if (apiDef.getClassification().isDistance()) {
+            placesService.sortPlacesByDistance(places);
+        } else {
+            placesService.sortPlacesByRanting(places);
+        }
+    }
+
+    private List<PlacePhoto> getPlacesPhotos(List<String> idsLocations, List<Place> places){
+        final List<PlacePhoto> photos = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(idsLocations)) {
+            places.stream().filter(it -> it.getId().equals(idsLocations.getFirst()))
+                .map(Place::getPhotos).flatMap(Collection::stream).map(PlacePhoto::getName)
+                .map(placesService::getPlacePhoto)
+                .forEach(photos::add);
+        }
+
+        return photos;
+    }
+
+    private List<Place> getPlacesBasedOnQuestion(QuestionApiUsage apiUsage, Location location) {
+        final PlaceRequestRestrictionCircle circle = new PlaceRequestRestrictionCircle();
+        circle.setCenter(location);
+        circle.setRadius(placesProperties.getRadius());
+
+        final List<Place> places = new ArrayList<>();
+        if (apiUsage.getApi().isSearchNearby()) {
+            final PlacesSearchNearbyRequest request = new PlacesSearchNearbyRequest();
+            request.setLocationRestriction(new PlaceRequestRestriction(circle));
+            request.addIncludedType(apiUsage.locationType());
+            final PlacesResponse response = placesService.searchNearby(request);
+            places.addAll(response.getPlaces());
+        } else if (apiUsage.getApi().isSearchText()) {
+            final PlacesSearchTextRequest request = new PlacesSearchTextRequest();
+            request.setLocationBias(new PlaceRequestRestriction(circle));
+            request.setTextQuery(apiUsage.getTextQuery());
+            final PlacesResponse response = placesService.searchText(request);
+            places.addAll(response.getPlaces());
+            places.removeIf(place -> ListUtils.noneMatch(place.getTypes(), apiUsage.locationType()));
+        }
+
+        return places;
     }
 
     private List<PlaceDetails> getPlacesDetailsWithContext(List<Place> places) {
@@ -146,7 +187,22 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
             final String name = place.getDisplayName().getText();
             final String wikipediaText = getLocationDescription(place);
             final PlaceDetails details = new PlaceDetails(name, place.getId(), place.getShortFormattedAddress(),
-                place.getRating(), openingHours, wikipediaText, place.getTypes());
+                place.getRating(), openingHours, wikipediaText, place.getTypes(), place.getDistance());
+            placeDetails.add(details);
+        });
+
+        return placeDetails;
+    }
+
+    private List<PlaceDetails> getPlacesDetails(List<Place> places) {
+        final List<PlaceDetails> placeDetails = new ArrayList<>();
+
+        places.parallelStream().forEach(place -> {
+            final List<String> openingHours = ListUtils.valueOrDefault(place.getCurrentOpeningHours(),
+                    OpeningHours::getWeekdayDescriptions, place.getWeekdayDescriptions());
+            final String name = place.getDisplayName().getText();
+            final PlaceDetails details = new PlaceDetails(name, place.getId(), place.getShortFormattedAddress(),
+                    place.getRating(), openingHours, null, place.getTypes(), place.getDistance());
             placeDetails.add(details);
         });
 
@@ -176,11 +232,11 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
     }
 
     private String getUserQuestion(QuestionRequest questionRequest) {
-        switch (questionRequest.formatType()) {
+        switch (questionRequest.getFormatType()) {
             case AUDIO:
-                return speechToTextService.recognizeAudioMP3(questionRequest.question());
+                return speechToTextService.recognizeAudioMP3(questionRequest.getQuestion());
             case TEXT:
-                return questionRequest.question();
+                return questionRequest.getQuestion();
             default:
                 throw new IllegalArgumentException("Formato não suportado");
         }

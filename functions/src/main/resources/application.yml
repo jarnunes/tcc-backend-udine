@@ -22,8 +22,10 @@ logging:
 udine:
   google:
     places:
+      connection-attempts: ${GOOGLE_PLACES_CONNECTION_ATTEMPTS:3}
       url: ${GOOGLE_PLACES_URL:https://places.googleapis.com/v1}
-      nearby-search-path: ${GOOGLE_PLACES_NEARBY_SEARCH_PATH:/places:searchNearby}
+      search-nearby-path: ${GOOGLE_PLACES_SEARCH_NEARBY_PATH:/places:searchNearby}
+      search-text-path: ${GOOGLE_PLACES_SEARCH_TEXT_PATH:/places:searchText}
       apiKey: ${GOOGLE_PLACES_API_KEY}
       radius: ${GOOGLE_PLACES_RADIUS:2000}
       max-results: ${GOOGLE_PLACES_MAX_RESULTS:50}
@@ -58,7 +60,7 @@ udine:
     path: ${OPEN_AI_PATH:/v1/chat/completions}
     api-key: ${OPEN_AI_API_KEY}
     model: ${OPEN_AI_MODEL:gpt-4o-mini}
-    max-tokens: ${OPEN_AI_MAX_TOKENS:200}
+    max-tokens: ${OPEN_AI_MAX_TOKENS:1000}
     temperature: ${OPEN_AI_TEMPERATURE:0.7}
     create-fake-text: ${OPEN_AI_CREATE_FAKE_TEXT:false}
     fake-text: ${OPEN_AI_FAKE_TEXT:Olá, sou o UdineTour. Este é um texto gerado automaticamente para reduzir o custo da integração com a OpenAI}

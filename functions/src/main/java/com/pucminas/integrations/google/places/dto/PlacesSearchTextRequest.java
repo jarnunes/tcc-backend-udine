@@ -11,11 +11,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class PlaceRequestRestrictionCenter implements Serializable {
+public class PlacesSearchTextRequest implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -6009281159093132716L;
+    private static final long serialVersionUID = -472297264770491541L;
+    private PlaceRequestRestriction locationBias;
+    private String textQuery;
 
-    private Double latitude;
-    private Double longitude;
 }

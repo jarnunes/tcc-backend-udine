@@ -38,5 +38,6 @@ public class Place implements Serializable {
     private OpeningHours currentOpeningHours;
     private List<Review> reviews = new ArrayList<>();
     private List<PlacePhoto> photos = new ArrayList<>();
+    private Double distance;
 
 }

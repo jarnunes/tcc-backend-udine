@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,13 +14,12 @@ import lombok.Setter;
 public class QuestionLlmAnswer {
 
     private String answer;
-    private String idLocation;
+    private List<String> idLocations;
 
-
-    public static QuestionLlmAnswer LlmSample(){
+    public static QuestionLlmAnswer llmSample(){
         QuestionLlmAnswer sample = new QuestionLlmAnswer();
         sample.setAnswer("AQUI VEM SUA RESPOSTA");
-        sample.setIdLocation("AQUI VEM O ID DO LOCAL");
+        sample.setIdLocations(List.of("AQUI VEM O(S) ID(S) DO LOCAL"));
         return sample;
     }
 }
