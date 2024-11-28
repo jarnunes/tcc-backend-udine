@@ -206,12 +206,12 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
 
     @Override
     public void sortPlacesByRanting(List<Place> places) {
-        places.sort(Comparator.comparingDouble(Place::getRating));
+        places.sort(Comparator.comparing(Place::getRating, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 
     @Override
     public void sortPlacesByDistance(List<Place> places) {
-        places.sort(Comparator.comparingDouble(Place::getDistance));
+        places.sort(Comparator.comparing(Place::getDistance, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 
     @Override
