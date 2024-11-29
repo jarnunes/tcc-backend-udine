@@ -2,9 +2,11 @@ package com.pucminas.integrations.wikipedia;
 
 import com.pucminas.commons.utils.MessageUtils;
 import com.pucminas.commons.utils.StrUtils;
-import com.pucminas.commons.utils.TextMatcherUtils;
 import com.pucminas.integrations.ServiceBase;
-import com.pucminas.integrations.wikipedia.dto.*;
+import com.pucminas.integrations.wikipedia.dto.QueryLikeResponse;
+import com.pucminas.integrations.wikipedia.dto.SearchLike;
+import com.pucminas.integrations.wikipedia.dto.WikipediaQueryLikeResponse;
+import com.pucminas.integrations.wikipedia.dto.WikipediaResponse;
 import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,14 +60,10 @@ public class WikipediaServiceImpl extends ServiceBase implements WikipediaServic
     }
 
     @Override
-    public String getNearestWikipediaTitle(SearchByTitleAndCity filter) {
-        return cacheService.getCachedValueOrNew(getClass(), "CACHE_KEY_NEAREST_WIKIPEDIA_TITLE", filter,
-            this::searchNearestOnWikipedia);
-    }
-
-    private String searchNearestOnWikipedia(SearchByTitleAndCity searchFilter) {
-        final String titles = StrUtils.joinObjects(searchFilter.title(), searchFilter.city());
-        final List<SearchLike> searchResults = processWithAttempts(3, titles, () ->
+    public List<SearchLike> getNearestWikipediaTitles(String name) {
+        cacheService.removeCacheItem(getClass(), "CACHE_KEY_NEAREST_WIKIPEDIA_TITLES", name);
+        return cacheService.getCachedValueOrNew(getClass(), "CACHE_KEY_NEAREST_WIKIPEDIA_TITLES", name, t ->
+               processWithAttempts(3, name, () ->
                 WebClient.builder().baseUrl(properties.getUrl())
                         .build().get()
                         .uri(uriBuilder -> uriBuilder
@@ -74,20 +72,13 @@ public class WikipediaServiceImpl extends ServiceBase implements WikipediaServic
                                 .queryParam("format", properties.getFormat())
                                 .queryParam("explaintext", properties.getExplaintext())
                                 .queryParam("list", "search")
-                                .queryParam("srsearch", titles)
+                                .queryParam("srsearch", name)
                                 .build())
                         .retrieve()
                         .bodyToMono(WikipediaQueryLikeResponse.class)
                         .mapNotNull(WikipediaQueryLikeResponse::query)
                         .mapNotNull(QueryLikeResponse::search)
-                        .block());
-
-        if (searchResults == null || searchResults.isEmpty()) {
-            return null;
-        }
-
-        final List<String> suggestedTitles = searchResults.stream().map(SearchLike::title).toList();
-        return TextMatcherUtils.findBestMatch(titles, searchFilter.city(), suggestedTitles);
+                        .block()));
     }
 
 }

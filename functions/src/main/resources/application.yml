@@ -51,6 +51,7 @@ udine:
         - places.regularOpeningHours
         - places.currentOpeningHours
         - places.photos
+        - places.priceLevel
 
   geocode:
     url: ${GEOCODE_URL:https://maps.googleapis.com/maps/api/geocode/json}

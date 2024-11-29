@@ -1,5 +1,7 @@
 package com.pucminas.commons.utils;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +11,10 @@ import java.util.stream.Collectors;
 public class ListUtils {
 
     private ListUtils() {
+    }
+
+    public static <T> List<T> valueOrEmpty(List<T> list) {
+        return CollectionUtils.isEmpty(list) ? List.of() : list;
     }
 
     public static <T, R> List<R> valueOrDefault(T object, Function<T, List<R>> mapper, List<R> defaultValue) {

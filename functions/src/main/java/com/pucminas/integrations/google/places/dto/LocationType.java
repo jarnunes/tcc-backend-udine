@@ -29,6 +29,10 @@ public enum LocationType {
     public boolean isTouristAttraction() {
         return this.equals(TOURIST_ATTRACTION);
     }
+
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
+    }
 }
 
 

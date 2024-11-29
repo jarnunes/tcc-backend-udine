@@ -1,5 +1,6 @@
 package com.pucminas.integrations.google.places;
 
+import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.commons.utils.NumberUtils;
 import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.geocode.GeocodeService;
@@ -96,6 +97,9 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
 
     @Override
     public PlacesResponse searchText(PlacesSearchTextRequest request) {
+        //TODO: Remover
+        cacheService.removeCacheItem(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request);
+
         return cacheService.getCachedValueOrNew(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request, it ->
                 processWithAttempts(properties.getConnectionAttempts(), request, () ->
                         getBuilder().baseUrl(properties.getUrl())
@@ -221,5 +225,21 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
             final String city = geocodeService.getCityName(location.getLatitude(), location.getLongitude());
             place.setCity(city);
         });
+    }
+
+    @Override
+    public List<Place> searchText(QuestionDefinition questionDefinition, Location location) {
+        final PlaceRequestRestrictionCircle circle = new PlaceRequestRestrictionCircle();
+        circle.setCenter(location);
+        circle.setRadius(properties.getRadius());
+
+        final PlacesSearchTextRequest request = new PlacesSearchTextRequest();
+        request.setLocationBias(new PlaceRequestRestriction(circle));
+        request.setTextQuery(questionDefinition.getTextQuery());
+        final PlacesResponse response = searchText(request);
+        final List<Place> places = ListUtils.valueOrDefault(response, PlacesResponse::getPlaces, List.of());
+        places.removeIf(place -> ListUtils.noneMatch(place.getTypes(), questionDefinition.locationType()));
+
+        return places;
     }
 }

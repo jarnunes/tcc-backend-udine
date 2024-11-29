@@ -18,12 +18,15 @@ public class PlaceDetails implements Serializable {
     @Serial
     private static final long serialVersionUID = 3924624425814428956L;
     private String name;
+    private String city;
     private String id;
     private String address;
     private Double ranting;
-    private List<String> opening_hours;
+    private List<String> openingHours;
+    private String wikipediaTitle;
     private String wikipediaDescription;
     private List<String> locationTypes;
     private Double distance;
+    private String priceLevel;
 
 }

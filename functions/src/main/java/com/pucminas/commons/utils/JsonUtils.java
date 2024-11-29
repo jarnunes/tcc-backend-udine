@@ -1,10 +1,13 @@
 package com.pucminas.commons.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pucminas.commons.JsonException;
+
+import java.util.List;
 
 public class JsonUtils {
 
@@ -16,6 +19,17 @@ public class JsonUtils {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
+            throw new JsonException(MessageUtils.get("json.err.convert.object.to.string"), e);
+        }
+    }
+
+    public static <T> List<T> toList(String jsonString, Class<T> clazz) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            return objectMapper.readValue(jsonString, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz)
+            );
+        } catch (Exception e) {
             throw new JsonException(MessageUtils.get("json.err.convert.object.to.string"), e);
         }
     }

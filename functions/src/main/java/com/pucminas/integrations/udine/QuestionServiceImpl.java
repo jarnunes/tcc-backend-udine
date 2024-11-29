@@ -12,7 +12,7 @@ import com.pucminas.integrations.google.tech_to_speech.TextToSpeechService;
 import com.pucminas.integrations.openai.OpenAiService;
 import com.pucminas.integrations.udine.vo.*;
 import com.pucminas.integrations.wikipedia.WikipediaService;
-import com.pucminas.integrations.wikipedia.dto.SearchByTitleAndCity;
+import com.pucminas.integrations.wikipedia.dto.SearchLike;
 import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -75,15 +75,16 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         final boolean isAudioQuestion = QuestionFormatType.AUDIO.equals(questionRequest.getFormatType());
         final String question = getUserQuestion(questionRequest);
 
-        final QuestionApiUsage apiDef = openAiService.determineWhichGoogleMapsApiToUse(question);
-        if(apiDef == null || apiDef.getApi().isNone()) {
+        final QuestionDefinition questionDefinition = openAiService.createQuestionDefinition(question);
+        log.info("\nquestionDefinition: " + JsonUtils.toJsonString(questionDefinition) + "\n");
+        if(questionDefinition == null) {
             return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
                     .responseMsgKey("questions.interpretable.question")
                     .placePhotos(List.of())
                     .build();
         }
 
-        final List<Place> places = getPlacesBasedOnQuestion(apiDef, questionRequest.getLocation());
+        final List<Place> places = placesService.searchText(questionDefinition, questionRequest.getLocation());
         if(places.isEmpty()) {
             return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
                     .responseMsgKey("questions.nearby.location.not.found")
@@ -93,21 +94,21 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
         placesService.complementWithDistance(places, questionRequest.getLocation());
         placesService.complementWithCityName(places);
-        sortPlaces(apiDef, places);
+        sortPlaces(questionDefinition, places);
 
-        final List<PlaceDetails> placeDetails = new ArrayList<>();
+        final List<PlaceDetails> placeDetails = getPlacesDetails(places);
         QuestionLlmAnswer answer;
-        if (apiDef.getLocationType().isRestaurant()) {
-            placeDetails.addAll(getPlacesDetails(places));
+        if (questionDefinition.getLocationType().isRestaurant()) {
+
             answer = answerQuestion("openai.generate.response.for.restaurant", question, placeDetails);
-        } else if (apiDef.getLocationType().isHotel()) {
-            placeDetails.addAll(getPlacesDetails(places));
+        } else if (questionDefinition.getLocationType().isHotel()) {
+
             answer = answerQuestion("openai.generate.response.for.hotel", question, placeDetails);
-        } else if (apiDef.getLocationType().isTouristAttraction()) {
-            placeDetails.addAll(getPlacesDetailsWithContext(places));
+        } else if (questionDefinition.getLocationType().isTouristAttraction()) {
+            setWikipediaTitle(placeDetails);
+            setWikipediaDescription(placeDetails);
             answer = answerQuestion("openai.generate.response.for.tourist.attraction", question, placeDetails);
         } else {
-            placeDetails.addAll(getPlacesDetailsWithContext(places));
             answer = answerQuestion("openai.generate.response.for.locations", question, placeDetails);
         }
 
@@ -119,7 +120,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         }
 
         final List<PlacePhoto> photos =  new ArrayList<>();
-        if(apiDef.isShowPhotos() && CollectionUtils.isNotEmpty(answer.getIdLocations())){
+        if(questionDefinition.isShowPhotos() && CollectionUtils.isNotEmpty(answer.getIdLocations())){
             photos.addAll(getPlacesPhotos(answer.getIdLocations(), places));
         }
 
@@ -130,7 +131,9 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
     }
 
     private QuestionLlmAnswer answerQuestion(final String promptKey, final String question, List<PlaceDetails> placeDetails) {
-        final String prompt = MessageUtils.get(promptKey, question, JsonUtils.toJsonString(placeDetails));
+        final String prompt = MessageUtils.get(promptKey, question, JsonUtils.toJsonString(placeDetails),
+            placesProperties.getRadius());
+
         final String response = openAiService.answerQuestion(prompt);
 
         try {
@@ -142,7 +145,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         }
     }
 
-    private void sortPlaces(QuestionApiUsage apiDef, List<Place> places) {
+    private void sortPlaces(QuestionDefinition apiDef, List<Place> places) {
         if (apiDef.getClassification().isDistance()) {
             placesService.sortPlacesByDistance(places);
         } else {
@@ -169,81 +172,56 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         return photos;
     }
 
-    private List<Place> getPlacesBasedOnQuestion(QuestionApiUsage apiUsage, Location location) {
-        final PlaceRequestRestrictionCircle circle = new PlaceRequestRestrictionCircle();
-        circle.setCenter(location);
-        circle.setRadius(placesProperties.getRadius());
-
-        final List<Place> places = new ArrayList<>();
-        if (apiUsage.getApi().isSearchNearby()) {
-            final PlacesSearchNearbyRequest request = new PlacesSearchNearbyRequest();
-            request.setLocationRestriction(new PlaceRequestRestriction(circle));
-            request.addIncludedType(apiUsage.locationType());
-            final PlacesResponse response = placesService.searchNearby(request);
-            places.addAll(response.getPlaces());
-        } else if (apiUsage.getApi().isSearchText()) {
-            final PlacesSearchTextRequest request = new PlacesSearchTextRequest();
-            request.setLocationBias(new PlaceRequestRestriction(circle));
-            request.setTextQuery(apiUsage.getTextQuery());
-            final PlacesResponse response = placesService.searchText(request);
-            places.addAll(response.getPlaces());
-            places.removeIf(place -> ListUtils.noneMatch(place.getTypes(), apiUsage.locationType()));
-        }
-
-        return places;
-    }
-
-    private List<PlaceDetails> getPlacesDetailsWithContext(List<Place> places) {
-        final List<PlaceDetails> placeDetails = new ArrayList<>();
-
-        places.parallelStream().forEach(place -> {
-            final List<String> openingHours = ListUtils.valueOrDefault(place.getCurrentOpeningHours(),
-                OpeningHours::getWeekdayDescriptions, place.getWeekdayDescriptions());
-            final String name = place.getDisplayName().getText();
-            final String wikipediaText = getLocationDescription(place);
-            final PlaceDetails details = new PlaceDetails(name, place.getId(), place.getShortFormattedAddress(),
-                place.getRating(), openingHours, wikipediaText, place.getTypes(), place.getDistance());
-            placeDetails.add(details);
-        });
-
-        return placeDetails;
-    }
-
     private List<PlaceDetails> getPlacesDetails(List<Place> places) {
         final List<PlaceDetails> placeDetails = new ArrayList<>();
-
-        places.parallelStream().forEach(place -> {
-            final List<String> openingHours = ListUtils.valueOrDefault(place.getCurrentOpeningHours(),
-                    OpeningHours::getWeekdayDescriptions, place.getWeekdayDescriptions());
-            final String name = place.getDisplayName().getText();
-            final PlaceDetails details = new PlaceDetails(name, place.getId(), place.getShortFormattedAddress(),
-                    place.getRating(), openingHours, null, place.getTypes(), place.getDistance());
-            placeDetails.add(details);
-        });
-
+        places.parallelStream().forEach(place -> placeDetails.add(createPlaceDetails(place)));
         return placeDetails;
     }
 
-    /**
-     * Returns location description from wikipedia or site scraping
-     *
-     * @return String
-     */
-    private String getLocationDescription(Place place) {
+    private PlaceDetails createPlaceDetails(Place place) {
+        final List<String> openingHours = ListUtils.valueOrDefault(place.getCurrentOpeningHours(),
+            OpeningHours::getWeekdayDescriptions, place.getWeekdayDescriptions());
         final String name = place.getDisplayName().getText();
-        final String wikipediaText = wikipediaService.getWikipediaText(name);
-        if (StringUtils.isNotBlank(wikipediaText)
-                && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.search.title.error", name))
-                && !StringUtils.startsWith(wikipediaText, MessageUtils.get("wikipedia.title.not.found", name))) {
-            return wikipediaText;
-        }
+        return new PlaceDetails(name, place.getCity(), place.getId(), place.getShortFormattedAddress(), place.getRating(),
+            openingHours, null, null, place.getTypes(), place.getDistance(), place.getPriceLevel());
+    }
 
-        final String nearestTitle = wikipediaService.getNearestWikipediaTitle(new SearchByTitleAndCity(name, place.getCity()));
-        if (StringUtils.isBlank(nearestTitle)) {
-            return MessageUtils.get("wikipedia.title.not.found", name);
-        }
+    private void setWikipediaTitle(List<PlaceDetails> places) {
+        final List<PlaceInWikipedia> placeInWikipediaList = Collections.synchronizedList(new ArrayList<>());
+        places.parallelStream().forEach(place -> {
+            final String name = place.getName();
+            final List<SearchLike> nearestTitles = wikipediaService.getNearestWikipediaTitles(name);
+            if (CollectionUtils.isNotEmpty(nearestTitles)) {
+                placeInWikipediaList.add(new PlaceInWikipedia(place.getId(), name, place.getCity(), nearestTitles));
+            }
+        });
 
-        return wikipediaService.getWikipediaText(nearestTitle);
+        if(CollectionUtils.isNotEmpty(placeInWikipediaList)){
+            final String prompt = MessageUtils.get("openai.find.wikipedia.title", JsonUtils.toJsonString(placeInWikipediaList));
+            final String response = openAiService.answerQuestion(prompt);
+            if(StringUtils.isNotEmpty(response)){
+                try {
+                    final List<PlaceInWikipedia> placeInWikipediaListResponse = JsonUtils.toList(response, PlaceInWikipedia.class);
+                    final Map<String, PlaceDetails> placeInWikipediaMap = ListUtils.toMap(places, PlaceDetails::getId);
+
+                    placeInWikipediaListResponse.forEach(placeInWikipedia -> {
+                        final PlaceDetails place = placeInWikipediaMap.get(placeInWikipedia.getId());
+                        if(place != null){
+                            place.setWikipediaTitle(placeInWikipedia.getTitle());
+                        }
+                    });
+                } catch (Exception e) {
+                    log.error("Erro ao processar resposta obtida do LLM", e);
+                }
+            }
+        }
+    }
+
+    private void setWikipediaDescription(List<PlaceDetails> places) {
+        places.parallelStream().filter(it -> StringUtils.isNotEmpty(it.getWikipediaTitle())).forEach(place -> {
+            final String wikipediaText = wikipediaService.getWikipediaText(place.getName());
+            place.setWikipediaDescription(wikipediaText);
+        });
     }
 
     private String getUserQuestion(QuestionRequest questionRequest) {

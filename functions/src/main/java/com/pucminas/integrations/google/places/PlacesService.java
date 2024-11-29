@@ -1,5 +1,6 @@
 package com.pucminas.integrations.google.places;
 
+import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.integrations.google.places.dto.*;
 
 import java.util.List;
@@ -25,4 +26,7 @@ public interface PlacesService {
     Photo getPlacePhoto(String photoReference);
 
     List<Photo> getPlacePhotos(List<String> photoReferences);
+
+    List<Place> searchText(QuestionDefinition questionDefinition, Location location);
+
 }

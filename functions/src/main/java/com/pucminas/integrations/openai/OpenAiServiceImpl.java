@@ -5,12 +5,10 @@ import com.pucminas.commons.utils.MessageUtils;
 import com.pucminas.commons.utils.StrUtils;
 import com.pucminas.integrations.ServiceBase;
 import com.pucminas.integrations.google.places.dto.Place;
-import com.pucminas.integrations.google.places.dto.QuestionApiUsage;
+import com.pucminas.integrations.google.places.dto.QuestionDefinition;
 import com.pucminas.integrations.openai.vo.OpenAiRequest;
 import com.pucminas.integrations.openai.vo.OpenAiResponse;
-import com.pucminas.integrations.wikipedia.dto.SearchLike;
 import lombok.extern.apachecommons.CommonsLog;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -85,17 +83,10 @@ public class OpenAiServiceImpl extends ServiceBase implements OpenAiService {
     }
 
     @Override
-    public String findCorrectPlaceTitle(String searchTitle, List<SearchLike> searchResults) {
-        final String prompt = MessageUtils.get("openai.find.location.name", searchTitle, JsonUtils.toJsonString(searchResults));
-        final String response = processPromptWithRateLimiting(prompt);
-        return StringUtils.equals("NOT_FOUND", response) ? null : StringUtils.replace(response, "\"", "");
-    }
-
-    @Override
-    public QuestionApiUsage determineWhichGoogleMapsApiToUse(String question) {
+    public QuestionDefinition createQuestionDefinition(String question) {
         final String prompt = MessageUtils.get("openai.google.maps.decision.prompt", question);
         final String response = processPromptWithRateLimiting(prompt);
-        return JsonUtils.toObject(response, QuestionApiUsage.class);
+        return JsonUtils.toObject(response, QuestionDefinition.class);
     }
 
     private String processPromptWithRateLimiting(String prompt) {

@@ -12,12 +12,11 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionApiUsage implements Serializable {
+public class QuestionDefinition implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1241924373083223788L;
 
-    private ApiType api;
     private ClassificationType classification;
     private LocationType locationType;
     private String textQuery;

@@ -39,5 +39,7 @@ public class Place implements Serializable {
     private List<Review> reviews = new ArrayList<>();
     private List<PlacePhoto> photos = new ArrayList<>();
     private Double distance;
+    private String priceLevel;
+    private String wikipediaTitle;
 
 }
