@@ -35,8 +35,11 @@ udine:
         - hotel
       types:
         - tourist_attraction
+        - town_square
         - restaurant
+        - food
         - hotel
+
       media:
         max-width: ${GOOGLE_PLACES_MEDIA_MAX_WIDTH:400}
         max-height: ${GOOGLE_PLACES_MEDIA_MAX_HEIGHT:400}

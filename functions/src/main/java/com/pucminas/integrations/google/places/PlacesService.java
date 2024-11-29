@@ -1,6 +1,5 @@
 package com.pucminas.integrations.google.places;
 
-import com.pucminas.commons.utils.ListUtils;
 import com.pucminas.integrations.google.places.dto.*;
 
 import java.util.List;
@@ -11,7 +10,7 @@ public interface PlacesService {
     // https://developers.google.com/maps/documentation/places/web-service/place-details?hl=pt-br
     // https://developers.google.com/maps/documentation/places/web-service/nearby-search?hl=pt-br
     PlacesResponse searchNearby(PlacesSearchNearbyRequest request);
-    PlacesResponse searchText(PlacesSearchTextRequest request);
+    PlacesResponse searchByText(PlacesSearchTextRequest request);
 
     void sortPlacesByRanting(List<Place> places);
     void sortPlacesByDistance(List<Place> places);
@@ -27,6 +26,6 @@ public interface PlacesService {
 
     List<Photo> getPlacePhotos(List<String> photoReferences);
 
-    List<Place> searchText(QuestionDefinition questionDefinition, Location location);
+    List<Place> searchByText(QuestionDefinition questionDefinition, Location location);
 
 }

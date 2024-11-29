@@ -96,7 +96,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
     }
 
     @Override
-    public PlacesResponse searchText(PlacesSearchTextRequest request) {
+    public PlacesResponse searchByText(PlacesSearchTextRequest request) {
         //TODO: Remover
         cacheService.removeCacheItem(getClass(), KEY_PLACES_SERVICE_SEARCH_TEXT, request);
 
@@ -228,7 +228,7 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
     }
 
     @Override
-    public List<Place> searchText(QuestionDefinition questionDefinition, Location location) {
+    public List<Place> searchByText(QuestionDefinition questionDefinition, Location location) {
         final PlaceRequestRestrictionCircle circle = new PlaceRequestRestrictionCircle();
         circle.setCenter(location);
         circle.setRadius(properties.getRadius());
@@ -236,9 +236,9 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
         final PlacesSearchTextRequest request = new PlacesSearchTextRequest();
         request.setLocationBias(new PlaceRequestRestriction(circle));
         request.setTextQuery(questionDefinition.getTextQuery());
-        final PlacesResponse response = searchText(request);
+        final PlacesResponse response = searchByText(request);
         final List<Place> places = ListUtils.valueOrDefault(response, PlacesResponse::getPlaces, List.of());
-        places.removeIf(place -> ListUtils.noneMatch(place.getTypes(), questionDefinition.locationType()));
+        places.removeIf(place -> ListUtils.noneMatch(place.getTypes(), properties.getTypes()));
 
         return places;
     }

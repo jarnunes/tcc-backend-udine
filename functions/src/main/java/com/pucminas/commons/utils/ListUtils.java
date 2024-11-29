@@ -25,6 +25,10 @@ public class ListUtils {
         return values.stream().noneMatch(value -> value.equals(reference));
     }
 
+    public static <T extends Comparable<T>> boolean noneMatch(List<T> values, List<T> reference) {
+        return values.stream().noneMatch(reference::contains);
+    }
+
     public static <K, V> Map<K, V> toMap(List<V> values, Function<V, K> keyMapper) {
         return values.stream().collect(Collectors.toMap(keyMapper, Function.identity()));
     }

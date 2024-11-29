@@ -84,7 +84,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
                     .build();
         }
 
-        final List<Place> places = placesService.searchText(questionDefinition, questionRequest.getLocation());
+        final List<Place> places = placesService.searchByText(questionDefinition, questionRequest.getLocation());
         if(places.isEmpty()) {
             return QuestionResponse.builder(isAudioQuestion, textToSpeechService::synthesizeTextString)
                     .responseMsgKey("questions.nearby.location.not.found")
@@ -99,10 +99,8 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
         final List<PlaceDetails> placeDetails = getPlacesDetails(places);
         QuestionLlmAnswer answer;
         if (questionDefinition.getLocationType().isRestaurant()) {
-
             answer = answerQuestion("openai.generate.response.for.restaurant", question, placeDetails);
         } else if (questionDefinition.getLocationType().isHotel()) {
-
             answer = answerQuestion("openai.generate.response.for.hotel", question, placeDetails);
         } else if (questionDefinition.getLocationType().isTouristAttraction()) {
             setWikipediaTitle(placeDetails);
@@ -219,7 +217,7 @@ public class QuestionServiceImpl extends ServiceBase implements QuestionService 
 
     private void setWikipediaDescription(List<PlaceDetails> places) {
         places.parallelStream().filter(it -> StringUtils.isNotEmpty(it.getWikipediaTitle())).forEach(place -> {
-            final String wikipediaText = wikipediaService.getWikipediaText(place.getName());
+            final String wikipediaText = wikipediaService.getWikipediaText(place.getWikipediaTitle());
             place.setWikipediaDescription(wikipediaText);
         });
     }
