@@ -80,17 +80,20 @@ public class PlacesServiceImpl extends ServiceBase implements PlacesService {
                                             .bodyToMono(PlacesResponse.class)
                                             .block()));
 
-            response.getPlaces().parallelStream().forEach(place -> {
-                final String city = geocodeService.getCityName(place.getLocation().getLatitude(), place.getLocation().getLongitude());
-                place.setCity(city);
-            });
-
-            response.addPlaces(responseByType.getPlaces());
+            if(responseByType != null)
+                response.addPlaces(responseByType.getPlaces());
         }
+
+        response.getPlaces().parallelStream().forEach(place -> {
+            final String city = geocodeService.getCityName(place.getLocation().getLatitude(), place.getLocation().getLongitude());
+            place.setCity(city);
+        });
 
         for (Place place : response.getPlaces()) {
             cacheService.putCache(place.getId(), place);
         }
+
+
 
         return response;
     }

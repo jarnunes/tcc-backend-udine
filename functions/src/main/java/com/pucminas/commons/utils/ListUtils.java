@@ -1,7 +1,9 @@
 package com.pucminas.commons.utils;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,5 +33,11 @@ public class ListUtils {
 
     public static <K, V> Map<K, V> toMap(List<V> values, Function<V, K> keyMapper) {
         return values.stream().collect(Collectors.toMap(keyMapper, Function.identity()));
+    }
+
+    public static <T> T firstOrNull(T[] values) {
+        if(ArrayUtils.isEmpty(values)) return null;
+
+        return Arrays.asList(values).getFirst();
     }
 }

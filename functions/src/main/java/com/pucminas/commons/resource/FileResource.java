@@ -2,6 +2,7 @@ package com.pucminas.commons.resource;
 
 
 import com.pucminas.commons.functions.ResourceConsumerThrows;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@CommonsLog
 public class FileResource implements Resource {
 
     public static FileResource instance() {
@@ -27,7 +29,7 @@ public class FileResource implements Resource {
                 try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
                     consumerExistentFile.accept(ois);
                 } catch (OptionalDataException e) {
-                    System.out.println("Dados não lidos: " + e.getMessage());
+                    log.error("Dados não lidos: " + e.getMessage());
                 }
             } else {
                 consumerNonExistentFile.accept(file);
@@ -36,9 +38,9 @@ public class FileResource implements Resource {
             try {
                 consumerOnException.accept(e);
             } catch (Throwable ex) {
-                ex.printStackTrace();
+                log.error(ex);
             }
-            e.printStackTrace();
+            log.error(e);
         }
     }
 
@@ -50,7 +52,7 @@ public class FileResource implements Resource {
             Path outputPath = Paths.get(filePathName);
             Files.write(outputPath, photo);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
         }
     }
 
@@ -61,7 +63,7 @@ public class FileResource implements Resource {
         try {
             return Files.readAllBytes(imagePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
             return new byte[0];
         }
     }
@@ -73,7 +75,7 @@ public class FileResource implements Resource {
         try {
             Files.delete(imagePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
         }
     }
 
@@ -87,7 +89,7 @@ public class FileResource implements Resource {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePathName))) {
             out.writeObject(object);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
         }
     }
 
@@ -100,7 +102,7 @@ public class FileResource implements Resource {
                 content.append(line).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
         }
         return content.toString();
     }
